@@ -1,25 +1,47 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { CartContext } from './cartContextDef';
+import { AuthContext } from './authContextValue';
 
 
 // 2. Tạo một ông Thủ kho (Provider) để quản lý Kho này
 export const CartProvider = ({ children }) => {
-  // Lấy dữ liệu giỏ hàng cũ từ bộ nhớ tạm trình duyệt (localStorage) nếu có
-  const storedCart = localStorage.getItem('cartItems');
-  const cartFromStorage = storedCart ? JSON.parse(storedCart) : [];
+  const { userInfo } = useContext(AuthContext);
+  const storageKey = userInfo ? `cartItems_${userInfo._id}` : 'cartItems_guest';
 
-  const [cartItems, setCartItems] = useState(cartFromStorage);
+  // Lấy dữ liệu giỏ hàng cũ từ bộ nhớ tạm trình duyệt (localStorage) nếu có
+  const [cartItems, setCartItems] = useState(() => {
+    const storedCart = localStorage.getItem(storageKey);
+    return storedCart ? JSON.parse(storedCart) : [];
+  });
+
+  const [prevStorageKey, setPrevStorageKey] = useState(storageKey);
+
+  // Điều chỉnh state ngay trong lúc render nếu tài khoản thay đổi (React Recommended)
+  if (storageKey !== prevStorageKey) {
+    const storedCart = localStorage.getItem(storageKey);
+    setCartItems(storedCart ? JSON.parse(storedCart) : []);
+    setPrevStorageKey(storageKey);
+  }
+
+  useEffect(() => {
+    // Giỏ hàng thực sự thay đổi -> Lưu vào localStorage
+    localStorage.setItem(storageKey, JSON.stringify(cartItems));
+  }, [cartItems, storageKey]);
+
+  // Hàm tạo khóa duy nhất cho mỗi item trong giỏ (phân biệt theo biến thể)
+  const getCartKey = (item) => `${item._id}_${item.color || ''}_${item.storageLabel || ''}`;
 
   // Hàm: Thêm 1 sản phẩm vào giỏ (có theo dõi số lượng qty)
   const addToCart = (product) => {
-    const existItem = cartItems.find((x) => x._id === product._id);
+    const newKey = getCartKey(product);
+    const existItem = cartItems.find((x) => getCartKey(x) === newKey);
 
     if (existItem) {
-      // Nếu đã có → tăng qty lên 1, nhưng không được vượt quá tồn kho
+      // Nếu đã có cùng biến thể → tăng qty lên 1
       setCartItems(
         cartItems.map((x) =>
-          x._id === existItem._id
-            ? { ...x, qty: Math.min(x.qty + 1, x.countInStock) }
+          getCartKey(x) === newKey
+            ? { ...x, qty: x.qty + 1 }
             : x
         )
       );
@@ -29,32 +51,29 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // Hàm: Cập nhật số lượng cho 1 sản phẩm (clamp giữa 1 và countInStock)
-  const updateQty = (id, newQty) => {
+  // Hàm: Cập nhật số lượng cho 1 sản phẩm
+  const updateQty = (id, newQty, color = null, storageLabel = null) => {
+    const targetKey = `${id}_${color || ''}_${storageLabel || ''}`;
     setCartItems(
       cartItems.map((x) =>
-        x._id === id
-          ? { ...x, qty: Math.max(1, Math.min(newQty, x.countInStock)) }
+        getCartKey(x) === targetKey
+          ? { ...x, qty: Math.max(1, newQty) }
           : x
       )
     );
   };
 
   // Hàm: Bỏ 1 sản phẩm khỏi giỏ
-  const removeFromCart = (id) => {
-    setCartItems(cartItems.filter((x) => x._id !== id));
+  const removeFromCart = (id, color = null, storageLabel = null) => {
+    const targetKey = `${id}_${color || ''}_${storageLabel || ''}`;
+    setCartItems(cartItems.filter((x) => getCartKey(x) !== targetKey));
   };
 
   // Hàm: Xóa toàn bộ giỏ hàng (dùng sau khi đặt hàng thành công)
   const clearCart = () => {
     setCartItems([]);
-    localStorage.removeItem('cartItems');
+    localStorage.removeItem(storageKey);
   };
-
-  // 3. Mỗi khi Giỏ hàng (cartItems) thay đổi, tự động lưu lại vào trình duyệt
-  useEffect(() => {
-    localStorage.setItem('cartItems', JSON.stringify(cartItems));
-  }, [cartItems]);
 
   return (
     // Giao chìa khóa Kho này cho toàn bộ ứng dụng (children)

@@ -29,19 +29,25 @@ const CartScreen = () => {
           </div>
         ) : (
           <ListGroup variant="flush" className="shadow-sm rounded border">
-            {cartItems.map((item) => (
-              <ListGroup.Item key={item._id} className="p-3">
+            {cartItems.map((item, index) => (
+              <ListGroup.Item key={`${item._id}_${item.color || ''}_${item.storageLabel || ''}_${index}`} className="p-3">
                 <Row className="align-items-center">
                   {/* Ảnh sản phẩm */}
                   <Col md={2}>
                     <Image src={item.image} alt={item.name} fluid rounded />
                   </Col>
                   
-                  {/* Tên sản phẩm */}
+                  {/* Tên sản phẩm + biến thể */}
                   <Col md={3}>
                     <Link to={`/product/${item._id}`} className="text-dark text-decoration-none fw-bold">
                       {item.name}
                     </Link>
+                    {(item.color || item.storageLabel) && (
+                      <div className="mt-1">
+                        {item.color && <small className="text-muted d-block">Màu: {item.color}</small>}
+                        {item.storageLabel && <small className="text-muted d-block">Phiên bản: {item.storageLabel}</small>}
+                      </div>
+                    )}
                   </Col>
                   
                   {/* Đơn giá */}
@@ -56,7 +62,7 @@ const CartScreen = () => {
                         variant="outline-secondary"
                         size="sm"
                         disabled={item.qty <= 1}
-                        onClick={() => updateQty(item._id, item.qty - 1)}
+                        onClick={() => updateQty(item._id, item.qty - 1, item.color, item.storageLabel)}
                         style={{ width: '32px', height: '32px', padding: 0 }}
                       >
                         <FaMinus size={10} />
@@ -70,7 +76,7 @@ const CartScreen = () => {
                         variant="outline-secondary"
                         size="sm"
                         disabled={item.qty >= item.countInStock}
-                        onClick={() => updateQty(item._id, item.qty + 1)}
+                        onClick={() => updateQty(item._id, item.qty + 1, item.color, item.storageLabel)}
                         style={{ width: '32px', height: '32px', padding: 0 }}
                       >
                         <FaPlus size={10} />
@@ -85,7 +91,7 @@ const CartScreen = () => {
                     <Button 
                         variant="light" 
                         className="text-danger" 
-                        onClick={() => removeFromCart(item._id)}
+                        onClick={() => removeFromCart(item._id, item.color, item.storageLabel)}
                     >
                       <FaTrash />
                     </Button>

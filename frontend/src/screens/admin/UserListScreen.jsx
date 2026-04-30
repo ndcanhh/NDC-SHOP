@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Table, Button, Spinner, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import { AuthContext } from '../../context/authContextValue';
+import { toast } from 'react-toastify';
 
 const UserListScreen = () => {
   const { userInfo } = useContext(AuthContext);
@@ -31,10 +32,10 @@ const UserListScreen = () => {
       try {
         const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
         await axios.delete(`/api/users/${id}`, config);
-        alert('Đã xóa thành công!');
+        toast.success('Đã xóa thành công!');
         setRefreshList(!refreshList); // Tải lại danh sách
       } catch (err) {
-        alert(err.response?.data?.message || err.message);
+        toast.error(err.response?.data?.message || err.message);
       }
     }
   };

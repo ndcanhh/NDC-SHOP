@@ -19,6 +19,8 @@ import ContactScreen from './screens/ContactScreen.jsx'
 import NewsScreen from './screens/NewsScreen.jsx'
 import CheckoutScreen from './screens/CheckoutScreen.jsx'
 import OrderScreen from './screens/OrderScreen.jsx'
+import CompareScreen from './screens/CompareScreen.jsx'
+import ProductCategoryScreen from './screens/ProductCategoryScreen.jsx'
 
 // Import các trang dành cho Admin
 import AdminRoute from './components/AdminRoute.jsx'
@@ -27,6 +29,9 @@ import AdminDashboard from './screens/admin/AdminDashboard.jsx'
 import UserListScreen from './screens/admin/UserListScreen.jsx'
 import ProductListScreen from './screens/admin/ProductListScreen.jsx'
 import OrderListScreen from './screens/admin/OrderListScreen.jsx'
+import CouponListScreen from './screens/admin/CouponListScreen.jsx'
+import ContactListScreen from './screens/admin/ContactListScreen.jsx'
+import NewsListScreen from './screens/admin/NewsListScreen.jsx'
 
 // Các Kho Lưu Trữ Chung (Context)
 import { CartProvider } from './context/CartContext.jsx'
@@ -53,6 +58,8 @@ const router = createBrowserRouter(
          <Route path='/news' element={<NewsScreen />} />
          <Route path='/checkout' element={<CheckoutScreen />} />
          <Route path='/orders' element={<OrderScreen />} />
+         <Route path='/compare' element={<CompareScreen />} />
+         <Route path='/products/:category' element={<ProductCategoryScreen />} />
       </Route>
 
       {/* 2. LAYOUT CHO ADMIN (Giao diện riêng, Logo ngang) */}
@@ -62,6 +69,9 @@ const router = createBrowserRouter(
             <Route path='userlist' element={<UserListScreen />} />
             <Route path='productlist' element={<ProductListScreen />} />
             <Route path='orderlist' element={<OrderListScreen />} />
+            <Route path='couponlist' element={<CouponListScreen />} />
+            <Route path='contactlist' element={<ContactListScreen />} />
+            <Route path='newslist' element={<NewsListScreen />} />
          </Route>
       </Route>
     </Route>
@@ -69,11 +79,9 @@ const router = createBrowserRouter(
 )
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <AuthProvider>
-      <CartProvider>
-        <RouterProvider router={router} />
-      </CartProvider>
-    </AuthProvider>
-  </React.StrictMode>,
+  <AuthProvider>
+    <CartProvider>
+      <RouterProvider router={router} />
+    </CartProvider>
+  </AuthProvider>,
 )

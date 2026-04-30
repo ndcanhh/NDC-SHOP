@@ -1,5 +1,13 @@
 {
   "name": "ndc-shop",
   "private": true,
-  "description": "NDC Shop - Website bán điện thoại chính hãng"
+  "description": "NDC Shop - Website bán điện thoại chính hãng",
+  "scripts": {
+    "server": "npm run dev --prefix backend",
+    "client": "npm run dev --prefix frontend",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
 }

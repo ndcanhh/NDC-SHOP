@@ -14,6 +14,10 @@ const uploadRoutes = require('./routes/uploadRoutes'); // Bảng chỉ đường
 const orderRoutes = require('./routes/orderRoutes');   // Bảng chỉ đường Đơn hàng
 const contactRoutes = require('./routes/contactRoutes'); // Bảng chỉ đường Liên hệ
 const chatbotRoutes = require('./routes/chatbotRoutes'); // Bảng chỉ đường Chatbot AI
+const addressRoutes = require('./routes/addressRoutes'); // Bảng chỉ đường Sổ Địa Chỉ
+const paymentRoutes = require('./routes/paymentRoutes'); // Bảng chỉ đường Thanh Toán
+const couponRoutes = require('./routes/couponRoutes');   // Bảng chỉ đường Mã Giảm Giá
+const newsRoutes = require('./routes/newsRoutes');       // Bảng chỉ đường Tin Tức
 
 const app = express(); // Tạo ra máy chủ (server) của chúng ta
 
@@ -45,6 +49,18 @@ app.use('/api/contacts', contactRoutes);
 
 // Treo bảng chỉ đường Chatbot AI
 app.use('/api/chatbot', chatbotRoutes);
+
+// Treo bảng chỉ đường Sổ Địa Chỉ
+app.use('/api/addresses', addressRoutes);
+
+// Treo bảng chỉ đường Thanh toán
+app.use('/api/payment', paymentRoutes);
+
+// Treo bảng chỉ đường Mã Giảm Giá
+app.use('/api/coupons', couponRoutes);
+
+// Treo bảng chỉ đường Tin Tức
+app.use('/api/news', newsRoutes);
 
 // Bước 5: Middleware xử lý lỗi toàn cục — bắt mọi lỗi throw ra từ controller/middleware
 // Nếu không có cái này, lỗi sẽ hiện nguyên stack trace cho client → lộ thông tin hệ thống

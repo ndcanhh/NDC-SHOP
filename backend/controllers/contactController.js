@@ -20,4 +20,26 @@ const createContact = asyncHandler(async (req, res) => {
     });
 });
 
-module.exports = { createContact };
+// @desc    Lấy toàn bộ tin nhắn liên hệ (Dành cho Admin)
+// @route   GET /api/contacts
+// @access  Private/Admin
+const getContacts = asyncHandler(async (req, res) => {
+    const contacts = await Contact.find({}).sort({ createdAt: -1 });
+    res.json(contacts);
+});
+
+// @desc    Xóa tin nhắn liên hệ
+// @route   DELETE /api/contacts/:id
+// @access  Private/Admin
+const deleteContact = asyncHandler(async (req, res) => {
+    const contact = await Contact.findById(req.params.id);
+    if (contact) {
+        await contact.deleteOne();
+        res.json({ message: 'Đã xóa tin nhắn liên hệ!' });
+    } else {
+        res.status(404);
+        throw new Error('Không tìm thấy tin nhắn!');
+    }
+});
+
+module.exports = { createContact, getContacts, deleteContact };

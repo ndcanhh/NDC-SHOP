@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { Navbar, Nav, Container, NavDropdown } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
-import { FaUserShield, FaSignOutAlt, FaBoxOpen, FaClipboardList, FaUsers, FaChartBar } from 'react-icons/fa';
+import { FaUserShield, FaSignOutAlt, FaBoxOpen, FaClipboardList, FaUsers, FaChartBar, FaTag, FaEnvelope, FaNewspaper } from 'react-icons/fa';
 import { AuthContext } from '../context/authContextValue';
 import { useNavigate } from 'react-router-dom';
 
@@ -36,6 +36,15 @@ const AdminHeader = () => {
             </LinkContainer>
             <LinkContainer to="/admin/userlist">
               <Nav.Link className="px-3"><FaUsers className="me-1 mb-1"/> Khách Hàng</Nav.Link>
+            </LinkContainer>
+            <LinkContainer to="/admin/couponlist">
+              <Nav.Link className="px-3"><FaTag className="me-1 mb-1"/> Mã Giảm Giá</Nav.Link>
+            </LinkContainer>
+            <LinkContainer to="/admin/contactlist">
+              <Nav.Link className="px-3"><FaEnvelope className="me-1 mb-1"/> Tin nhắn</Nav.Link>
+            </LinkContainer>
+            <LinkContainer to="/admin/newslist">
+              <Nav.Link className="px-3"><FaNewspaper className="me-1 mb-1"/> Tin tức</Nav.Link>
             </LinkContainer>
           </Nav>
           <Nav>

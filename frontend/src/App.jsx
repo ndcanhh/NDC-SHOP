@@ -4,6 +4,8 @@ import { Container } from 'react-bootstrap'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import Chatbot from './components/Chatbot'
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const App = () => {
   return (
@@ -17,6 +19,7 @@ const App = () => {
       </main>
       <Chatbot />
       <Footer />
+      <ToastContainer position="bottom-right" autoClose={3000} style={{ marginBottom: '80px' }} />
     </div>
   )
 }

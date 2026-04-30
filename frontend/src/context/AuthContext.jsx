@@ -39,6 +39,12 @@ export const AuthProvider = ({ children }) => {
 
   // Hàm xử lý Đăng Xuất (Xóa hồ sơ khỏi trình duyệt và gỡ Thẻ)
   const logout = () => {
+    // Xóa thông tin so sánh sản phẩm của phiên cũ
+    sessionStorage.removeItem('compare_p1');
+    sessionStorage.removeItem('compare_p2');
+    sessionStorage.removeItem('compare_s1');
+    sessionStorage.removeItem('compare_s2');
+    
     setUserInfo(null);
   };
 

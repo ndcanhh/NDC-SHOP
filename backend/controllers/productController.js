@@ -6,14 +6,24 @@ const cloudinary = require('../config/cloudinary');
 // Đường dẫn (Route): GET /api/products
 const getProducts = async (req, res) => {
     try {
-        // Dùng lệnh .find({}) để tìm TẤT CẢ dữ liệu nằm trong sổ Product
-        const products = await Product.find({});
+        // Lấy TẤT CẢ dữ liệu nhưng bỏ qua các sản phẩm đang bị ẩn
+        const products = await Product.find({ isHidden: { $ne: true } });
         
         // Gói dữ liệu lại bằng JSON và gửi trả về cho Frontend (React)
         res.json(products);
     } catch (error) {
         // Nếu có lỗi, trả về mã 500 (Lỗi máy chủ)
         res.status(500).json({ message: 'Lỗi khi lấy danh sách sản phẩm', error: error.message });
+    }
+};
+
+// Hàm lấy TẤT CẢ sản phẩm (Cả ẩn và hiện) cho Admin
+const getAdminProducts = async (req, res) => {
+    try {
+        const products = await Product.find({});
+        res.json(products);
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi khi lấy danh sách sản phẩm cho Admin', error: error.message });
     }
 };
 
@@ -56,7 +66,8 @@ const searchProducts = async (req, res) => {
         // limit có thể truyền qua query: ?limit=6 (cho dropdown gợi ý), mặc định 50
         const limit = parseInt(req.query.limit) || 50;
         const products = await Product.find({
-            name: { $regex: keyword, $options: 'i' }
+            name: { $regex: keyword, $options: 'i' },
+            isHidden: { $ne: true }
         }).limit(limit);
 
         res.json(products);
@@ -70,7 +81,7 @@ const searchProducts = async (req, res) => {
 // @access  Private/Admin
 const createProduct = async (req, res) => {
     try {
-        const { name, price, description, image, brand, countInStock, discount, specs } = req.body;
+        const { name, price, description, image, brand, countInStock, discount, specs, isHidden, tags, colorVariants, storageVariants } = req.body;
 
         const product = new Product({
             name: name || 'Sản phẩm mới',
@@ -79,6 +90,10 @@ const createProduct = async (req, res) => {
             brand: brand || 'Chưa rõ',
             countInStock: countInStock || 0,
             discount: discount || 0,
+            tags: tags || [],
+            colorVariants: colorVariants || [],
+            storageVariants: storageVariants || [],
+            isHidden: isHidden || false,
             description: description || '',
             specs: specs || { ram: '', rom: '', chip: '', battery: '' }
         });
@@ -95,7 +110,7 @@ const createProduct = async (req, res) => {
 // @access  Private/Admin
 const updateProduct = async (req, res) => {
     try {
-        const { name, price, description, image, brand, countInStock, discount, specs } = req.body;
+        const { name, price, description, image, brand, countInStock, discount, specs, isHidden, tags, colorVariants, storageVariants } = req.body;
         const product = await Product.findById(req.params.id);
 
         if (product) {
@@ -106,6 +121,10 @@ const updateProduct = async (req, res) => {
             product.brand = brand || product.brand;
             product.countInStock = countInStock !== undefined ? countInStock : product.countInStock;
             product.discount = discount !== undefined ? discount : product.discount;
+            product.isHidden = isHidden !== undefined ? isHidden : product.isHidden;
+            if (tags !== undefined) product.tags = tags;
+            if (colorVariants !== undefined) product.colorVariants = colorVariants;
+            if (storageVariants !== undefined) product.storageVariants = storageVariants;
             if (specs) product.specs = { ...product.specs, ...specs };
 
             const updatedProduct = await product.save();
@@ -154,6 +173,7 @@ const deleteProduct = async (req, res) => {
 
 module.exports = {
     getProducts,
+    getAdminProducts,
     getProductById,
     searchProducts,
     createProduct,

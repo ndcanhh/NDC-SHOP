@@ -8,9 +8,25 @@ const quickReplies = ['Thanh toán', 'Giao hàng', 'Bảo hành', 'Đổi trả'
 
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    { sender: 'bot', text: 'Xin chào! 👋 Tôi là trợ lý AI của NDC Shop.\nBạn có thể hỏi tôi bất cứ điều gì về sản phẩm, thanh toán, giao hàng, bảo hành...' }
-  ]);
+  const [messages, setMessages] = useState(() => {
+    const savedMessages = localStorage.getItem('chatHistory');
+    if (savedMessages) {
+      try {
+        return JSON.parse(savedMessages);
+      } catch (error) {
+        console.error('Lỗi khi đọc lịch sử chat:', error);
+      }
+    }
+    return [
+      { sender: 'bot', text: 'Xin chào! 👋 Tôi là trợ lý AI của NDC Shop.\nBạn có thể hỏi tôi bất cứ điều gì về sản phẩm, thanh toán, giao hàng, bảo hành...' }
+    ];
+  });
+
+  // Tự động lưu toàn bộ tin nhắn vào localStorage mỗi khi mảng messages thay đổi
+  useEffect(() => {
+    localStorage.setItem('chatHistory', JSON.stringify(messages));
+  }, [messages]);
+
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   
@@ -46,7 +62,7 @@ const Chatbot = () => {
     } catch {
       setMessages(prev => [...prev, {
         sender: 'bot',
-        text: '⚠️ Xin lỗi, tôi đang gặp sự cố kết nối. Vui lòng thử lại hoặc gọi Hotline 0973 521 509!'
+        text: 'Xin lỗi, tôi đang gặp sự cố kết nối. Vui lòng thử lại hoặc gọi Hotline 0973 521 509!'
       }]);
     }
     setLoading(false);

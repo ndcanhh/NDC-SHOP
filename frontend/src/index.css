@@ -393,3 +393,19 @@ body {
   color: #fff;
   transform: scale(1.1);
 }
+
+/* ================== TRANG PROFILE TABS ================== */
+.profile-custom-tabs .nav-link {
+  color: #212529 !important; /* Màu đen mặc định */
+  font-weight: 500;
+  transition: 0.2s;
+}
+
+.profile-custom-tabs .nav-link:hover {
+  color: #d70018 !important; /* Đỏ khi lướt chuột */
+}
+
+.profile-custom-tabs .nav-link.active {
+  color: #d70018 !important; /* Đỏ khi đang chọn */
+  font-weight: 700;          /* Đậm lên để dễ nhận diện */
+}

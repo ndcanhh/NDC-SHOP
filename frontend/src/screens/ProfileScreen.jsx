@@ -1,9 +1,10 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { Row, Col, Card, Form, Button, Spinner } from 'react-bootstrap';
-import { FaUser, FaEnvelope, FaPhone, FaLock, FaSave, FaKey } from 'react-icons/fa';
+import { Row, Col, Card, Form, Button, Spinner, Tabs, Tab } from 'react-bootstrap';
+import { FaUser, FaEnvelope, FaPhone, FaLock, FaSave, FaKey, FaMapMarkerAlt } from 'react-icons/fa';
 import { AuthContext } from '../context/authContextValue';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import AddressBook from '../components/AddressBook';
 
 const ProfileScreen = () => {
   const { userInfo, setUserInfo } = useContext(AuthContext);
@@ -148,8 +149,10 @@ const ProfileScreen = () => {
 
         {/* Cột phải: Form chỉnh sửa thông tin */}
         <Col md={9}>
-          <Card className="border-0 shadow-sm p-4">
-            <h5 className="fw-bold mb-4">Chỉnh sửa thông tin</h5>
+          <Tabs defaultActiveKey="profile" id="profile-tabs" className="mb-4 profile-custom-tabs">
+            <Tab eventKey="profile" title={<><FaUser className="me-2" />Thông tin chung</>}>
+              <Card className="border-0 shadow-sm p-4 rounded-top-0 border-top-0">
+                <h5 className="fw-bold mb-4">Chỉnh sửa thông tin</h5>
 
             {saved && (
               <div className="alert alert-success py-2">
@@ -214,7 +217,7 @@ const ProfileScreen = () => {
                   type="submit"
                   variant="danger"
                   size="sm"
-                  className="d-flex align-items-center gap-2"
+                  className="d-inline-flex align-items-center gap-2"
                   disabled={loadingSave}
                 >
                   {loadingSave ? <Spinner animation="border" size="sm" /> : <FaSave />} Lưu thay đổi
@@ -226,15 +229,18 @@ const ProfileScreen = () => {
             <hr className="my-4" />
 
             {/* Nút Thay đổi mật khẩu */}
-            <Button
-              variant={showChangePassword ? 'outline-secondary' : 'outline-danger'}
-              size="sm"
-              onClick={handleTogglePassword}
-              className="d-flex align-items-center gap-2"
-            >
-              <FaKey />
-              {showChangePassword ? 'Hủy đổi mật khẩu' : 'Thay đổi mật khẩu'}
-            </Button>
+            <div>
+              <Button
+                variant={showChangePassword ? 'outline-secondary' : 'outline-danger'}
+                size="sm"
+                onClick={handleTogglePassword}
+                className="d-inline-flex align-items-center gap-2"
+                style={{ width: 'fit-content' }}
+              >
+                <FaKey />
+                {showChangePassword ? 'Hủy đổi mật khẩu' : 'Thay đổi mật khẩu'}
+              </Button>
+            </div>
 
             {/* Thông báo */}
             {passwordMsg && (
@@ -290,24 +296,35 @@ const ProfileScreen = () => {
                 </Col>
 
                 <Col xs={12}>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    className="d-flex align-items-center gap-2"
-                    onClick={handleChangePassword}
-                    disabled={loadingPassword}
-                  >
-                    {loadingPassword ? (
-                      <Spinner animation="border" size="sm" />
-                    ) : (
-                      <FaSave />
-                    )}
-                    Lưu mật khẩu mới
-                  </Button>
+                  <div>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      className="d-inline-flex align-items-center gap-2"
+                      style={{ width: 'fit-content' }}
+                      onClick={handleChangePassword}
+                      disabled={loadingPassword}
+                    >
+                      {loadingPassword ? (
+                        <Spinner animation="border" size="sm" />
+                      ) : (
+                        <FaSave />
+                      )}
+                      Lưu mật khẩu mới
+                    </Button>
+                  </div>
                 </Col>
               </Row>
             )}
-          </Card>
+            </Card>
+            </Tab>
+
+            <Tab eventKey="address" title={<><FaMapMarkerAlt className="me-2" />Sổ địa chỉ</>}>
+              <Card className="border-0 shadow-sm p-4 rounded-top-0 border-top-0">
+                <AddressBook />
+              </Card>
+            </Tab>
+          </Tabs>
         </Col>
       </Row>
     </div>

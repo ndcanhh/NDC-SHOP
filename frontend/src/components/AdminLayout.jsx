@@ -2,6 +2,8 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import AdminHeader from './AdminHeader';
 import { Container } from 'react-bootstrap';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const AdminLayout = () => {
   return (
@@ -12,6 +14,7 @@ const AdminLayout = () => {
           <Outlet />
         </Container>
       </main>
+      <ToastContainer position="bottom-right" autoClose={3000} />
     </div>
   );
 };

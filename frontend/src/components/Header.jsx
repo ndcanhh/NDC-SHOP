@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import { Container, Navbar, Nav, Form, FormControl, Badge, NavDropdown } from 'react-bootstrap';
-import { FaShoppingCart, FaUser, FaSearch, FaPhoneAlt, FaMapMarkerAlt, FaFire, FaBars, FaInfoCircle, FaEnvelope, FaNewspaper, FaIdCard, FaSignOutAlt, FaBox, FaUserShield } from 'react-icons/fa';
+import { FaShoppingCart, FaUser, FaSearch, FaPhoneAlt, FaMapMarkerAlt, FaFire, FaBars, FaInfoCircle, FaEnvelope, FaNewspaper, FaIdCard, FaSignOutAlt, FaBox, FaUserShield, FaExchangeAlt, FaGlobe } from 'react-icons/fa';
 import { LinkContainer } from 'react-router-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -66,7 +66,9 @@ const Header = () => {
   };
 
   const logoutHandler = () => {
-    logout();
+    if (window.confirm('Bạn có chắc chắn muốn đăng xuất không?')) {
+      logout();
+    }
   };
 
   return (
@@ -87,7 +89,14 @@ const Header = () => {
             </div>
           </div>
 
-          <div className="d-flex gap-4 fw-bold" style={{ fontSize: '0.8rem' }}>
+          <div className="d-flex gap-4 fw-bold align-items-center" style={{ fontSize: '0.8rem' }}>
+            <div 
+              className="text-white d-flex align-items-center gap-1" 
+              style={{ cursor: 'help', opacity: 0.9 }} 
+              title="Tính năng đa ngôn ngữ sẽ được hoàn thiện trong phiên bản tiếp theo"
+            >
+              <FaGlobe size={11} /> Tiếng Việt
+            </div>
             <a href="#" className="text-white text-decoration-none d-flex align-items-center gap-1">
               <FaPhoneAlt size={11} /> 0973521509
             </a>
@@ -167,6 +176,14 @@ const Header = () => {
                       {cartItems.reduce((total, item) => total + (item.qty || 1), 0)}
                     </Badge>
                   )}
+                </Nav.Link>
+              </LinkContainer>
+
+              {/* Nút So sánh */}
+              <LinkContainer to="/compare">
+                <Nav.Link className="text-white header-btn position-relative d-flex align-items-center gap-2">
+                  <FaExchangeAlt size={20} /> 
+                  <span className="d-none d-lg-block" style={{ fontSize: '0.85rem' }}>So sánh</span>
                 </Nav.Link>
               </LinkContainer>
               
