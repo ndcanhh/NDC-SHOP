@@ -83,17 +83,10 @@ npm run dev
 
 ---
 
-## 📜 Tài Liệu Đi Kèm
-- [Sơ đồ lớp lĩnh vực (PlantUML)](./domain_class_diagram.puml)
-- [Bản đồ cấu trúc dự án (PROJECT_MAP.md)](./PROJECT_MAP.md)
-- [Hướng dẫn triển khai (DEPLOY_GUIDE.md)](./DEPLOY_GUIDE.md)
-
----
-
 ## 👨‍💻 Tác Giả
-- **Họ tên**: [Tên của bạn]
+- **Họ tên**: Nguyễn Đức Cảnh
 - **Đề tài**: Xây dựng website thương mại điện tử NDC SHOP.
-- **Đơn vị**: [Tên trường/khoa của bạn]
+- **Đơn vị**: Đại học Kinh tế Quốc dân
 
 ---
 *Dự án được xây dựng với sự tâm huyết cho kỳ thực tập và khóa luận tốt nghiệp 2026.*
