@@ -22,8 +22,9 @@ const newsSchema = mongoose.Schema({
         required: true, // Nội dung chi tiết (HTML hoặc Markdown)
     },
     author: {
-        type: String,
-        default: 'Admin',
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true, // Bài viết phải do Admin tạo
     },
     tag: {
         type: String,

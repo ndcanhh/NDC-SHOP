@@ -5,7 +5,9 @@ const News = require('../models/newsModel');
 // @route   GET /api/news
 // @access  Public
 const getNews = asyncHandler(async (req, res) => {
-    const news = await News.find({}).sort({ createdAt: -1 });
+    const news = await News.find({})
+        .populate('author', 'name')
+        .sort({ createdAt: -1 });
     res.json(news);
 });
 
@@ -13,7 +15,7 @@ const getNews = asyncHandler(async (req, res) => {
 // @route   GET /api/news/:id
 // @access  Public
 const getNewsById = asyncHandler(async (req, res) => {
-    const news = await News.findById(req.params.id);
+    const news = await News.findById(req.params.id).populate('author', 'name');
     if (news) {
         res.json(news);
     } else {
@@ -35,7 +37,8 @@ const createNews = asyncHandler(async (req, res) => {
         description,
         content,
         tag,
-        tagColor
+        tagColor,
+        author: req.user._id, // Lấy ID Admin đang đăng nhập
     });
 
     const createdNews = await news.save();
