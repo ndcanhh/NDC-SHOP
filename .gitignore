@@ -9,3 +9,8 @@ build/
 dist/
 coverage/
 *.log
+
+# Private Docs
+DEPLOY_GUIDE.md
+PROJECT_MAP.md
+*.puml
