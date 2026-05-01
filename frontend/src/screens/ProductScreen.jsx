@@ -5,6 +5,7 @@ import axios from 'axios';
 import { CartContext } from '../context/cartContextDef';
 import { FaCartPlus } from 'react-icons/fa';
 import { toast } from 'react-toastify';
+import { optimizeCloudinaryUrl } from '../utils/imageUtils';
 
 // Hàm tiện ích: Chọn màu sắc nổi bật cho các Tag phổ biến
 const getBadgeVariant = (tag) => {
@@ -104,7 +105,12 @@ const ProductScreen = () => {
       
       <Row>
         <Col md={5}>
-          <Image src={displayImage} alt={product.name} fluid className="rounded shadow-sm" />
+          <Image 
+            src={optimizeCloudinaryUrl(displayImage, 600, 600)} 
+            alt={product.name} 
+            fluid 
+            className="rounded shadow-sm" 
+          />
         </Col>
 
         <Col md={4}>

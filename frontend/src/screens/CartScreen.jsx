@@ -4,6 +4,8 @@ import { Row, Col, ListGroup, Image, Card, Button } from 'react-bootstrap';
 import { FaTrash, FaMinus, FaPlus } from 'react-icons/fa';
 import { CartContext } from '../context/cartContextDef';
 import { AuthContext } from '../context/authContextValue';
+import { optimizeCloudinaryUrl } from '../utils/imageUtils';
+
 
 const CartScreen = () => {
   // Lấy danh sách sản phẩm và các hàm xử lý từ Context
@@ -34,7 +36,7 @@ const CartScreen = () => {
                 <Row className="align-items-center">
                   {/* Ảnh sản phẩm */}
                   <Col md={2}>
-                    <Image src={item.image} alt={item.name} fluid rounded />
+                    <Image src={optimizeCloudinaryUrl(item.image, 100, 100)} alt={item.name} fluid rounded />
                   </Col>
                   
                   {/* Tên sản phẩm + biến thể */}

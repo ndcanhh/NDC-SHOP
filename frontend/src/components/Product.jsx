@@ -4,14 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { CartContext } from '../context/cartContextDef';
 import { FaCartPlus } from 'react-icons/fa';
 import { toast } from 'react-toastify';
-
-// Hàm "phép thuật" Cloudinary: chèn tham số resize + nén vào giữa URL
-// VD: .../upload/v123/abc.png → .../upload/c_fill,w_400,h_400,q_auto,f_auto/v123/abc.png
-// c_fill = cắt vừa khung | w_400,h_400 = 400x400px | q_auto = tự nén | f_auto = tự chọn định dạng nhẹ nhất (webp)
-const optimizeCloudinaryUrl = (url, width = 400, height = 400) => {
-    if (!url || !url.includes('cloudinary')) return url; // Nếu không phải URL Cloudinary thì bỏ qua
-    return url.replace('/upload/', `/upload/c_fill,w_${width},h_${height},q_auto,f_auto/`);
-};
+import { optimizeCloudinaryUrl } from '../utils/imageUtils';
 
 // Hàm tiện ích: Chọn màu sắc nổi bật cho các Tag phổ biến
 const getBadgeVariant = (tag) => {
@@ -50,7 +43,12 @@ const Product = ({ product }) => {
       {discount > 0 && <div className="discount-badge">Giảm {discount}%</div>}
 
       <Link to={`/product/${product._id}`}>
-        <Card.Img src={optimizeCloudinaryUrl(product.image)} variant='top' />
+        <Card.Img 
+          src={optimizeCloudinaryUrl(product.image, 320, 320)} 
+          variant='top' 
+          loading="lazy"
+          style={{ aspectRatio: '1/1', objectFit: 'contain' }}
+        />
       </Link>
 
       <Card.Body className="d-flex flex-column p-0 pt-2">

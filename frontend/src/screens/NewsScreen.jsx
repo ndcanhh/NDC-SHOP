@@ -2,6 +2,8 @@ import React from 'react';
 import { Row, Col, Card, Badge, Spinner } from 'react-bootstrap';
 import axios from 'axios';
 import { FaCalendarAlt, FaTag } from 'react-icons/fa';
+import { optimizeCloudinaryUrl } from '../utils/imageUtils';
+
 
 const newsData = [
   {
@@ -96,7 +98,7 @@ const NewsScreen = () => {
               <Card className="border-0 shadow-sm h-100 news-card" style={{ cursor: 'pointer' }}>
                 {/* Header màu gradient thay cho ảnh */}
                 <div className="news-card-header" style={{
-                  background: news.image ? `url(${news.image}) center/cover` : `linear-gradient(135deg, #d70018, #ff6b35)`,
+                  background: news.image ? `url(${optimizeCloudinaryUrl(news.image, 400, 200)}) center/cover` : `linear-gradient(135deg, #d70018, #ff6b35)`,
                   height: news.image ? '180px' : '8px',
                   borderRadius: '12px 12px 0 0'
                 }} />
