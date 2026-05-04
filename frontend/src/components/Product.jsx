@@ -77,7 +77,7 @@ const Product = ({ product }) => {
             {product.storageVariants && product.storageVariants.length > 0 ? (
               <>
                 <span className="price-current">
-                  Từ {Math.min(...product.storageVariants.map(v => v.price)).toLocaleString('vi-VN')} đ
+                  {Math.min(...product.storageVariants.map(v => v.price)).toLocaleString('vi-VN')} đ
                 </span>
               </>
             ) : (

@@ -42,7 +42,8 @@ const ProductScreen = () => {
           setSelectedColor(data.colorVariants[0]);
         }
         if (data.storageVariants && data.storageVariants.length > 0) {
-          setSelectedStorage(data.storageVariants[0]);
+          const lowestPriceVariant = data.storageVariants.reduce((min, v) => v.price < min.price ? v : min, data.storageVariants[0]);
+          setSelectedStorage(lowestPriceVariant);
         }
       } catch (err) {
         setError('Không tìm thấy sản phẩm hoặc đã có lỗi xảy ra!');

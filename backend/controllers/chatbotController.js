@@ -46,55 +46,130 @@ const chatWithAI = asyncHandler(async (req, res) => {
     }
 
     try {
-        // --- 1. LẤY DANH SÁCH SẢN PHẨM TỪ DATABASE ---
-        const products = await Product.find({}).select('name price countInStock discount specs.ram specs.rom');
+        console.log('📤 [ROUTER] Đang phân tích ý định người dùng bằng Llama-3-8b...');
         
-        let productListText = "\n\n--- DANH SÁCH SẢN PHẨM HIỆN CÓ TẠI CỬA HÀNG ---\n";
-        if (products.length === 0) {
-            productListText += "Hiện tại web đang trống, chưa có sản phẩm nào.\n";
-        } else {
-            products.forEach((p, index) => {
-                const finalPrice = p.price - (p.price * (p.discount || 0) / 100);
-                const status = p.countInStock > 0 ? "Còn hàng" : "Hết hàng";
-                const specs = (p.specs?.ram || '') + (p.specs?.rom ? '/' + p.specs.rom : '');
-                productListText += `${index + 1}. ${p.name} ${specs ? `(${specs})` : ''} - Giá: ${finalPrice.toLocaleString('vi-VN')} VND (Giảm ${p.discount}%) - Tình trạng: ${status}\n`;
-            });
+        // --- BƯỚC 1: INTENT ROUTING (Phân loại ý định siêu tốc với mô hình nhỏ) ---
+        const routerSystemPrompt = `Bạn là bộ định tuyến (Router) phân loại ý định người dùng cho một chatbot bán điện thoại (NDC Shop). 
+Hãy phân tích tin nhắn và trả về MỘT chuỗi JSON hợp lệ với định dạng: {"intent": "LOẠI_Ý_ĐỊNH", "search_query": "từ_khóa"}.
+Các loại intent:
+- "PRODUCT": Hỏi về giá, tồn kho, mua hàng, thông tin một loại điện thoại cụ thể. 
+  Quy tắc tạo search_query: 
+  + CHỈ lấy tên hãng và dòng máy (VD: "iPhone 15 Pro Max", "Samsung S24"). 
+  + BỎ QUA số lượng, màu sắc, dung lượng (VD: "mua 10 chiếc ip 15 màu đen" -> "iPhone 15").
+  + CHUẨN HÓA từ viết tắt (VD: "ip" -> "iPhone", "ss" -> "Samsung", "pm" -> "Pro Max").
+- "ADVICE": Nhờ tư vấn, so sánh các máy, hỏi kiến thức chung. (search_query: "")
+- "CHITCHAT": Chào hỏi, cảm ơn, hỏi thăm. (search_query: "")
+
+Tuyệt đối CHỈ TRẢ VỀ CHUỖI JSON, không giải thích gì thêm.`;
+
+        // Lấy 3 tin nhắn gần nhất để Router hiểu ngữ cảnh (ví dụ: Khách bảo "lấy tôi 2 chiếc", Router phải biết đang nói về máy nào ở câu trước)
+        const recentHistory = (history || []).slice(-3).map(msg => ({
+            role: msg.sender === 'user' ? 'user' : 'assistant',
+            content: msg.text,
+        }));
+
+        const routerResponse = await groq.chat.completions.create({
+            messages: [
+                { role: 'system', content: routerSystemPrompt },
+                ...recentHistory,
+                { role: 'user', content: message }
+            ],
+            model: 'llama-3.1-8b-instant', // Mô hình siêu nhanh và rẻ
+            temperature: 0.1, // Nhiệt độ thấp để output ổn định JSON
+            response_format: { type: "json_object" } // Ép kiểu JSON
+        });
+
+        let intentData = { intent: "CHITCHAT", search_query: "" };
+        try {
+            intentData = JSON.parse(routerResponse.choices[0]?.message?.content);
+            console.log('✅ [ROUTER] Kết quả phân tích:', intentData);
+        } catch (e) {
+            console.log('⚠️ [ROUTER] Lỗi parse JSON, fallback về CHITCHAT', routerResponse.choices[0]?.message?.content);
         }
 
-        // Ghép System Prompt với danh sách sản phẩm thực tế
-        const dynamicSystemPrompt = SYSTEM_PROMPT + productListText;
+        const { intent, search_query } = intentData;
 
-        // --- 2. CHUẨN BỊ TIN NHẮN CHO AI ---
-        // Chuyển đổi lịch sử chat sang định dạng Groq/OpenAI
+        // --- BƯỚC 2: EXECUTION (Thực thi theo luồng đã phân loại) ---
+        let dynamicSystemPrompt = SYSTEM_PROMPT;
+        let selectedModel = 'llama-3.3-70b-versatile'; // Mặc định dùng mô hình thông minh
+        let maxTokens = 1024;
+
+        if (intent === 'PRODUCT') {
+            console.log(`🔍 [RAG] Truy vấn DB với từ khóa: "${search_query}"...`);
+            
+            // Tìm kiếm cơ bản trong DB (có thể nâng cấp thành Vector Search sau)
+            let query = null; // Mặc định không query nếu không có từ khóa
+            if (search_query && search_query.trim() !== '') {
+                // Tách từ khóa để tìm kiếm linh hoạt (VD: "iPhone Pro Max" -> chứa "iPhone" VÀ "Pro" VÀ "Max")
+                const keywords = search_query.split(' ').filter(k => k.trim() !== '');
+                if (keywords.length > 0) {
+                    query = {
+                        $and: keywords.map(kw => ({
+                            name: { $regex: kw, $options: 'i' }
+                        }))
+                    };
+                }
+            }
+            
+            if (query !== null) {
+                // Giới hạn số lượng sản phẩm trả về để không tràn Token
+                const products = await Product.find(query).limit(10).select('name price countInStock discount specs.ram specs.rom');
+                
+                let productListText = "\n\n--- THÔNG TIN SẢN PHẨM TỪ DATABASE (RAG) ---\n";
+                if (products.length === 0) {
+                    productListText += `Hiện tại không tìm thấy sản phẩm nào khớp với yêu cầu: "${search_query}". Hãy báo cho khách biết.\n`;
+                } else {
+                    products.forEach((p, index) => {
+                        const finalPrice = p.price - (p.price * (p.discount || 0) / 100);
+                        const status = p.countInStock > 0 ? "Còn hàng" : "Hết hàng";
+                        const specs = (p.specs?.ram || '') + (p.specs?.rom ? '/' + p.specs.rom : '');
+                        productListText += `${index + 1}. ${p.name} ${specs ? `(${specs})` : ''} - Giá: ${finalPrice.toLocaleString('vi-VN')} VND - Trạng thái: ${status}\n`;
+                    });
+                }
+                dynamicSystemPrompt += productListText;
+            }
+            
+            selectedModel = 'llama-3.3-70b-versatile'; // Dùng mô hình lớn để suy luận chính xác thông tin SP
+
+        } else if (intent === 'ADVICE') {
+            console.log(`🧠 [ADVICE] Giao cho mô hình lớn tư vấn (Không gọi DB để tránh nhiễu)...`);
+            dynamicSystemPrompt += "\n\n(Lưu ý: Khách đang nhờ tư vấn. Hãy đưa ra lời khuyên khách quan, sau đó có thể mời khách ghé shop. KHÔNG bịa ra giá sản phẩm nếu không chắc chắn.)";
+            selectedModel = 'llama-3.3-70b-versatile'; // Tư vấn thì cần AI thông minh nhất
+            
+        } else { // CHITCHAT
+            console.log(`💬 [CHITCHAT] Xử lý nhanh bằng mô hình nhỏ...`);
+            selectedModel = 'llama-3.1-8b-instant'; // Chào hỏi chỉ cần mô hình siêu nhẹ là đủ, tiết kiệm tiền và thời gian
+            maxTokens = 150;
+        }
+
+        // --- BƯỚC 3: TRẢ LỜI NGƯỜI DÙNG ---
         const chatHistory = (history || []).map(msg => ({
             role: msg.sender === 'user' ? 'user' : 'assistant',
             content: msg.text,
         }));
 
-        // Tạo danh sách messages: system prompt (dynamic) + lịch sử + tin nhắn mới
         const messages = [
             { role: 'system', content: dynamicSystemPrompt },
             ...chatHistory,
             { role: 'user', content: message },
         ];
 
-        console.log('📤 Đang gửi request đến Groq AI...');
+        console.log(`📤 Đang sinh câu trả lời với mô hình: ${selectedModel}...`);
 
-        // Gọi Groq API với model llama-3.3-70b-versatile
         const completion = await groq.chat.completions.create({
             messages,
-            model: 'llama-3.3-70b-versatile',
+            model: selectedModel,
             temperature: 0.7,
-            max_tokens: 1024,
+            max_tokens: maxTokens,
         });
 
         const response = completion.choices[0]?.message?.content || 'Xin lỗi, tôi không thể trả lời lúc này.';
 
-        console.log('✅ Groq AI trả lời thành công!');
+        console.log('✅ Sinh câu trả lời thành công!');
         res.json({ reply: response });
+
     } catch (error) {
         console.error('❌ Lỗi Groq AI:', error.message);
-        console.error('❌ Chi tiết:', error);
         res.status(500).json({ message: 'Lỗi khi gọi Groq AI: ' + error.message });
     }
 });
