@@ -16,7 +16,7 @@ const ProductListScreen = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentId, setCurrentId] = useState('');
   const [formData, setFormData] = useState({
-    name: '', price: 0, image: '', brand: '', countInStock: 0, discount: 0, description: '', isHidden: false,
+    name: '', price: 0, image: '', brand: '', discount: 0, description: '', isHidden: false,
     specs: { ram: '', rom: '', chip: '', battery: '' },
     tagsString: '',
     colorVariants: [],
@@ -70,7 +70,7 @@ const ProductListScreen = () => {
       setCurrentId(product._id);
       setFormData({
         name: product.name, price: product.price, image: product.image, brand: product.brand,
-        countInStock: product.countInStock, discount: product.discount || 0, description: product.description || '', isHidden: product.isHidden || false,
+        discount: product.discount || 0, description: product.description || '', isHidden: product.isHidden || false,
         specs: product.specs || { ram: '', rom: '', chip: '', battery: '' },
         tagsString: product.tags ? product.tags.join(', ') : '',
         colorVariants: product.colorVariants || [],
@@ -79,7 +79,7 @@ const ProductListScreen = () => {
     } else {
       setIsEditMode(false);
       setFormData({
-        name: '', price: 0, image: '/images/sample.jpg', brand: '', countInStock: 0, discount: 0, description: '', isHidden: false,
+        name: '', price: 0, image: '/images/sample.jpg', brand: '', discount: 0, description: '', isHidden: false,
         specs: { ram: '', rom: '', chip: '', battery: '' },
         tagsString: '',
         colorVariants: [],
@@ -166,7 +166,7 @@ const ProductListScreen = () => {
                 <td>{p._id}</td>
                 <td>{p.name}</td>
                 <td className="text-brand-red fw-bold">{p.price.toLocaleString('vi-VN')} đ</td>
-                <td>{p.countInStock} cái</td>
+                <td>{p.storageVariants ? p.storageVariants.reduce((sum, v) => sum + (v.countInStock || 0), 0) : 0} cái</td>
                 <td>
                   {p.isHidden ? (
                     <span className="badge bg-danger rounded-pill">Đã ẩn</span>
@@ -228,10 +228,7 @@ const ProductListScreen = () => {
                         </Form.Group>
                     </Col>
                     <Col md={6}>
-                        <Form.Group className="mb-3">
-                        <Form.Label>Tồn kho</Form.Label>
-                        <Form.Control type="number" value={formData.countInStock} onChange={(e) => setFormData({...formData, countInStock: Number(e.target.value)})} />
-                        </Form.Group>
+
                         <Form.Group className="mb-3">
                         <Form.Label>RAM</Form.Label>
                         <Form.Control type="text" value={formData.specs.ram} onChange={(e) => setFormData({...formData, specs: {...formData.specs, ram: e.target.value}})} />

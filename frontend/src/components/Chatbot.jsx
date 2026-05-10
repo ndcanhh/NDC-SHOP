@@ -101,7 +101,7 @@ const Chatbot = () => {
           <Card.Header className="bg-brand-red text-white d-flex justify-content-between align-items-center p-3 border-0">
             <div className="d-flex align-items-center gap-2 fw-bold">
               <FaRobot size={24} /> NDC Trợ lý AI
-              <span className="badge bg-success" style={{ fontSize: '0.6rem' }}>Gemini</span>
+              <span className="badge bg-success" style={{ fontSize: '0.6rem' }}>Groq</span>
             </div>
             <Button variant="link" className="text-white p-0" onClick={() => setIsOpen(false)}>
               <FaTimes size={20} />

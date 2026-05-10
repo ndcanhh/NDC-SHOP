@@ -60,9 +60,9 @@ const SearchScreen = () => {
         // Hiển thị danh sách sản phẩm tìm được
         <>
           <p className="text-muted mb-3">Tìm thấy <strong>{products.length}</strong> sản phẩm</p>
-          <Row>
+          <Row className="g-2">
             {products.map((product) => (
-              <Col key={product._id} sm={12} md={6} lg={4} xl={3} className="d-flex align-items-stretch">
+              <Col key={product._id} xs={6} sm={6} md={6} lg={4} className="d-flex align-items-stretch" style={{ flex: '0 0 20%', maxWidth: '20%' }}>
                 <Product product={product} />
               </Col>
             ))}

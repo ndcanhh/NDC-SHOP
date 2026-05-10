@@ -40,14 +40,14 @@ const chatWithAI = asyncHandler(async (req, res) => {
     }
 
     if (!process.env.GROQ_API_KEY) {
-        console.error('❌ Chưa có GROQ_API_KEY trong .env!');
+        console.error('Chưa có GROQ_API_KEY trong .env!');
         res.status(500);
         throw new Error('Chưa cấu hình GROQ_API_KEY!');
     }
 
     try {
-        console.log('📤 [ROUTER] Đang phân tích ý định người dùng bằng Llama-3-8b...');
-        
+        console.log('Đang phân tích ý định người dùng bằng Llama-3-8b...');
+
         // --- BƯỚC 1: INTENT ROUTING (Phân loại ý định siêu tốc với mô hình nhỏ) ---
         const routerSystemPrompt = `Bạn là bộ định tuyến (Router) phân loại ý định người dùng cho một chatbot bán điện thoại (NDC Shop). 
 Hãy phân tích tin nhắn và trả về MỘT chuỗi JSON hợp lệ với định dạng: {"intent": "LOẠI_Ý_ĐỊNH", "search_query": "từ_khóa"}.
@@ -82,9 +82,9 @@ Tuyệt đối CHỈ TRẢ VỀ CHUỖI JSON, không giải thích gì thêm.`;
         let intentData = { intent: "CHITCHAT", search_query: "" };
         try {
             intentData = JSON.parse(routerResponse.choices[0]?.message?.content);
-            console.log('✅ [ROUTER] Kết quả phân tích:', intentData);
+            console.log('[ROUTER] Kết quả phân tích:', intentData);
         } catch (e) {
-            console.log('⚠️ [ROUTER] Lỗi parse JSON, fallback về CHITCHAT', routerResponse.choices[0]?.message?.content);
+            console.log('[ROUTER] Lỗi parse JSON, fallback về CHITCHAT', routerResponse.choices[0]?.message?.content);
         }
 
         const { intent, search_query } = intentData;
@@ -95,7 +95,7 @@ Tuyệt đối CHỈ TRẢ VỀ CHUỖI JSON, không giải thích gì thêm.`;
         let maxTokens = 1024;
 
         if (intent === 'PRODUCT') {
-            console.log(`🔍 [RAG] Truy vấn DB với từ khóa: "${search_query}"...`);
+            console.log(`[RAG] Truy vấn DB với từ khóa: "${search_query}"...`);
             
             // Tìm kiếm cơ bản trong DB (có thể nâng cấp thành Vector Search sau)
             let query = null; // Mặc định không query nếu không có từ khóa
@@ -113,7 +113,7 @@ Tuyệt đối CHỈ TRẢ VỀ CHUỖI JSON, không giải thích gì thêm.`;
             
             if (query !== null) {
                 // Giới hạn số lượng sản phẩm trả về để không tràn Token
-                const products = await Product.find(query).limit(10).select('name price countInStock discount specs.ram specs.rom');
+                const products = await Product.find(query).limit(10).select('name price storageVariants discount specs.ram specs.rom');
                 
                 let productListText = "\n\n--- THÔNG TIN SẢN PHẨM TỪ DATABASE (RAG) ---\n";
                 if (products.length === 0) {
@@ -121,7 +121,8 @@ Tuyệt đối CHỈ TRẢ VỀ CHUỖI JSON, không giải thích gì thêm.`;
                 } else {
                     products.forEach((p, index) => {
                         const finalPrice = p.price - (p.price * (p.discount || 0) / 100);
-                        const status = p.countInStock > 0 ? "Còn hàng" : "Hết hàng";
+                        const totalStock = p.storageVariants ? p.storageVariants.reduce((sum, v) => sum + (v.countInStock || 0), 0) : 0;
+                        const status = totalStock > 0 ? "Còn hàng" : "Hết hàng";
                         const specs = (p.specs?.ram || '') + (p.specs?.rom ? '/' + p.specs.rom : '');
                         productListText += `${index + 1}. ${p.name} ${specs ? `(${specs})` : ''} - Giá: ${finalPrice.toLocaleString('vi-VN')} VND - Trạng thái: ${status}\n`;
                     });
@@ -132,12 +133,12 @@ Tuyệt đối CHỈ TRẢ VỀ CHUỖI JSON, không giải thích gì thêm.`;
             selectedModel = 'llama-3.3-70b-versatile'; // Dùng mô hình lớn để suy luận chính xác thông tin SP
 
         } else if (intent === 'ADVICE') {
-            console.log(`🧠 [ADVICE] Giao cho mô hình lớn tư vấn (Không gọi DB để tránh nhiễu)...`);
+            console.log(`[ADVICE] Giao cho mô hình lớn tư vấn (Không gọi DB để tránh nhiễu)...`);
             dynamicSystemPrompt += "\n\n(Lưu ý: Khách đang nhờ tư vấn. Hãy đưa ra lời khuyên khách quan, sau đó có thể mời khách ghé shop. KHÔNG bịa ra giá sản phẩm nếu không chắc chắn.)";
             selectedModel = 'llama-3.3-70b-versatile'; // Tư vấn thì cần AI thông minh nhất
             
         } else { // CHITCHAT
-            console.log(`💬 [CHITCHAT] Xử lý nhanh bằng mô hình nhỏ...`);
+            console.log(`[CHITCHAT] Xử lý nhanh bằng mô hình nhỏ...`);
             selectedModel = 'llama-3.1-8b-instant'; // Chào hỏi chỉ cần mô hình siêu nhẹ là đủ, tiết kiệm tiền và thời gian
             maxTokens = 150;
         }
@@ -154,7 +155,7 @@ Tuyệt đối CHỈ TRẢ VỀ CHUỖI JSON, không giải thích gì thêm.`;
             { role: 'user', content: message },
         ];
 
-        console.log(`📤 Đang sinh câu trả lời với mô hình: ${selectedModel}...`);
+        console.log(`Đang sinh câu trả lời với mô hình: ${selectedModel}...`);
 
         const completion = await groq.chat.completions.create({
             messages,
@@ -165,11 +166,11 @@ Tuyệt đối CHỈ TRẢ VỀ CHUỖI JSON, không giải thích gì thêm.`;
 
         const response = completion.choices[0]?.message?.content || 'Xin lỗi, tôi không thể trả lời lúc này.';
 
-        console.log('✅ Sinh câu trả lời thành công!');
+        console.log('Sinh câu trả lời thành công!');
         res.json({ reply: response });
 
     } catch (error) {
-        console.error('❌ Lỗi Groq AI:', error.message);
+        console.error('Lỗi Groq AI:', error.message);
         res.status(500).json({ message: 'Lỗi khi gọi Groq AI: ' + error.message });
     }
 });

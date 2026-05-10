@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Row, Col, Image, ListGroup, Card, Button, Spinner, Alert, Badge } from 'react-bootstrap';
 import axios from 'axios';
 import { CartContext } from '../context/cartContextDef';
+import { AuthContext } from '../context/authContextValue';
 import { FaCartPlus } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import { optimizeCloudinaryUrl } from '../utils/imageUtils';
@@ -31,6 +32,7 @@ const ProductScreen = () => {
 
   // Gọi hàm addToCart từ Thủ kho
   const { addToCart } = useContext(CartContext);
+  const { userInfo } = useContext(AuthContext);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -58,34 +60,52 @@ const ProductScreen = () => {
   // Giá hiển thị: Ưu tiên biến thể ROM đang chọn, fallback về giá gốc
   const displayPrice = selectedStorage ? selectedStorage.price : product.price;
 
-  // Tồn kho hiển thị: Ưu tiên biến thể ROM, fallback về tồn kho gốc
-  const displayStock = selectedStorage ? selectedStorage.countInStock : product.countInStock;
+  const displayStock = selectedStorage ? selectedStorage.countInStock : 0;
 
   // Ảnh hiển thị: Ưu tiên biến thể màu, fallback về ảnh gốc
   const displayImage = selectedColor ? selectedColor.image : product.image;
 
   // Hàm xử lý khi khách bấm nút "Thêm vào giỏ hàng" từ trang Chi tiết
   const handleAddToCart = () => {
+    if (!userInfo) {
+      toast.warning('Vui lòng đăng nhập để thêm vào giỏ hàng!');
+      navigate('/login');
+      return;
+    }
     const cartItem = {
       ...product,
       price: displayPrice,
+      countInStock: displayStock,
       image: displayImage,
       color: selectedColor?.color || null,
       storageLabel: selectedStorage?.label || null,
     };
-    addToCart(cartItem);
-    toast.success('Đã thêm ' + product.name + ' vào giỏ hàng!');
+    const success = addToCart(cartItem);
+    if (success) {
+      toast.success(`Đã thêm ${product.name} vào giỏ hàng!`);
+    } else {
+      toast.error(`Chỉ còn ${displayStock} sản phẩm trong kho, bạn đã thêm đủ số lượng!`);
+    }
   };
 
   const handleBuyNow = () => {
+    if (!userInfo) {
+      toast.warning('Vui lòng đăng nhập để mua hàng!');
+      navigate('/login');
+      return;
+    }
     const cartItem = {
       ...product,
       price: displayPrice,
+      countInStock: displayStock,
       image: displayImage,
       color: selectedColor?.color || null,
       storageLabel: selectedStorage?.label || null,
     };
-    addToCart(cartItem);
+    const success = addToCart(cartItem);
+    if (!success) {
+      toast.error('Số lượng trong giỏ hàng đã đạt giới hạn tồn kho!');
+    }
     navigate('/checkout');
   };
 
@@ -218,35 +238,41 @@ const ProductScreen = () => {
                   <Col>Trạng thái:</Col>
                   <Col>
                     {displayStock > 0 ? (
-                        <span className="text-success fw-bold">Còn hàng ({displayStock})</span>
+                      <span className="text-success fw-bold">
+                        Còn hàng {displayStock <= 5 && `(${displayStock})`}
+                      </span>
                     ) : (
-                        <span className="text-danger fw-bold">Hết hàng</span>
+                      <span className="text-danger fw-bold">Hết hàng</span>
                     )}
                   </Col>
                 </Row>
               </ListGroup.Item>
               
               <ListGroup.Item>
-                <div className="d-flex gap-2">
-                  <Button 
-                    variant="danger" 
-                    className="buy-btn flex-grow-1 m-0 py-2" 
-                    onClick={handleBuyNow} 
-                    disabled={displayStock === 0}
-                  >
-                    {displayStock === 0 ? 'Hết hàng' : 'MUA NGAY'}
+                {displayStock === 0 ? (
+                  <Button variant="secondary" className="w-100 py-2 fs-5 fw-bold" disabled>
+                    Hết hàng
                   </Button>
-                  <Button 
-                    variant="outline-danger" 
-                    className="flex-shrink-0" 
-                    style={{ width: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px' }}
-                    onClick={handleAddToCart} 
-                    disabled={displayStock === 0} 
-                    title="Thêm vào giỏ hàng"
-                  >
-                    <FaCartPlus size={20} />
-                  </Button>
-                </div>
+                ) : (
+                  <div className="d-flex gap-2">
+                    <Button 
+                      variant="danger" 
+                      className="buy-btn flex-grow-1 m-0 py-2" 
+                      onClick={handleBuyNow} 
+                    >
+                      MUA NGAY
+                    </Button>
+                    <Button 
+                      variant="outline-danger" 
+                      className="flex-shrink-0" 
+                      style={{ width: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px' }}
+                      onClick={handleAddToCart} 
+                      title="Thêm vào giỏ hàng"
+                    >
+                      <FaCartPlus size={20} />
+                    </Button>
+                  </div>
+                )}
               </ListGroup.Item>
             </ListGroup>
           </Card>

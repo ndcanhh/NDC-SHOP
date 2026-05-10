@@ -1,4 +1,4 @@
-// File này là "Cửa nhận hàng" — nơi Backend nhận file ảnh từ Frontend
+// File này là nơi Backend nhận file ảnh từ Frontend
 // rồi chuyển phát nhanh lên kho Cloudinary trên đám mây
 
 const express = require('express');
@@ -7,15 +7,14 @@ const cloudinary = require('../config/cloudinary');
 const multer = require('multer');
 
 // Cấu hình multer: lưu ảnh tạm trong bộ nhớ RAM trước khi đẩy lên cloud
-// (Giống như nhân viên bưu điện cầm bưu kiện trên tay trong lúc chờ xe tải đến)
 const storage = multer.memoryStorage();
 
 // Bộ lọc: chỉ cho phép upload file ảnh (jpg, png, webp), từ chối file khác
 const fileFilter = (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) {
-        cb(null, true);  // ✅ Đây là ảnh → cho phép
+        cb(null, true);  // Đây là ảnh → cho phép
     } else {
-        cb(new Error('Chỉ được upload file ảnh!'), false); // ❌ Không phải ảnh → từ chối
+        cb(new Error('Chỉ được upload file ảnh!'), false); // Không phải ảnh → từ chối
     }
 };
 

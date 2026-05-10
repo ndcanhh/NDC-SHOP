@@ -3,7 +3,7 @@ const router = express.Router();
 const { getProducts, getAdminProducts, getProductById, searchProducts, createProduct, updateProduct, deleteProduct } = require('../controllers/productController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
-// Biển báo Tìm kiếm: GET /api/products/search?keyword=iphone
+// Tìm kiếm: GET /api/products/search?keyword=iphone
 router.route('/search').get(searchProducts);
 
 // GET tất cả sản phẩm (bao gồm cả ẩn) cho Admin

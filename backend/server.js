@@ -1,10 +1,10 @@
 // Bước 1: Gọi các công cụ (thư viện) mà chúng ta cần dùng
-const express = require('express'); // 1. Express: Khung xương để xây dựng Backend (như anh quản lý nhà hàng)
+const express = require('express'); // 1. Express: Khung xương để xây dựng Backend
 const cors = require('cors');       // 2. CORS: Cấp phép cho Frontend được "nói chuyện" với Backend này
 const dotenv = require('dotenv');   // 3. Dotenv: Giúp đọc các mật khẩu ẩn trong file .env
 
 // Bước 2: Thiết lập cấu hình cơ bản
-dotenv.config(); // Kích hoạt việc đọc file .env (chúng ta sẽ tạo sau)
+dotenv.config(); // Kích hoạt việc đọc file .env
 const connectDB = require('./config/db'); // Nhập hàm kết nối mở cửa Kho dữ liệu
 connectDB(); // Gọi hàm đó để mở cửa Kho ngay khi Server bật lên
 // Kéo các bảng chỉ đường phụ vào
@@ -26,7 +26,7 @@ const app = express(); // Tạo ra máy chủ (server) của chúng ta
 app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:3000' }));
 app.use(express.json()); // Dạy cho server cách đọc API dạng JSON
 
-// Bước 4: Viết "Biển báo" đầu tiên (API Root)
+// Bước 4: Viết API Root
 app.get('/', (req, res) => {
     res.send('Chào mừng bạn đến với Server của NDC Shop!');
 });

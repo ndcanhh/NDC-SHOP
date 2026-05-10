@@ -37,17 +37,25 @@ export const CartProvider = ({ children }) => {
     const existItem = cartItems.find((x) => getCartKey(x) === newKey);
 
     if (existItem) {
-      // Nếu đã có cùng biến thể → tăng qty lên 1
+      // Nếu đã có cùng biến thể → tăng qty lên 1 nhưng không vượt quá tồn kho
+      if (existItem.qty >= product.countInStock) {
+        return false;
+      }
       setCartItems(
         cartItems.map((x) =>
           getCartKey(x) === newKey
-            ? { ...x, qty: x.qty + 1 }
+            ? { ...x, qty: Math.min(x.countInStock, x.qty + 1) }
             : x
         )
       );
+      return true;
     } else {
       // Nếu chưa có → thêm vào giỏ với qty = 1
-      setCartItems([...cartItems, { ...product, qty: 1 }]);
+      if (product.countInStock > 0) {
+        setCartItems([...cartItems, { ...product, qty: 1 }]);
+        return true;
+      }
+      return false;
     }
   };
 
@@ -57,7 +65,7 @@ export const CartProvider = ({ children }) => {
     setCartItems(
       cartItems.map((x) =>
         getCartKey(x) === targetKey
-          ? { ...x, qty: Math.max(1, newQty) }
+          ? { ...x, qty: Math.min(x.countInStock, Math.max(1, newQty)) }
           : x
       )
     );

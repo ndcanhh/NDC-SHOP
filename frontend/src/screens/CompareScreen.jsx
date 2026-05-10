@@ -327,6 +327,23 @@ const CompareScreen = () => {
           .table > :not(caption) > * > * {
             padding: 1rem 0.5rem;
           }
+          @media (max-width: 768px) {
+            .table > :not(caption) > * > * {
+              padding: 0.5rem 0.2rem;
+              font-size: 0.85rem;
+            }
+            .compare-img {
+              max-height: 100px !important;
+              width: 100% !important;
+              height: auto !important;
+            }
+            th h5 {
+              font-size: 1rem;
+            }
+            .fs-5 {
+              font-size: 1rem !important;
+            }
+          }
         `}
       </style>
     </Container>

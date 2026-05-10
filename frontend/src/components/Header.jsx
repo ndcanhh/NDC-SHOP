@@ -164,7 +164,7 @@ const Header = () => {
                 )}
             </div>
 
-            <Nav className="ms-auto align-items-center gap-2">
+            <Nav className="ms-auto align-items-center gap-2 flex-row flex-wrap justify-content-center mt-3 mt-lg-0">
               {/* Nút Giỏ hàng */}
               <LinkContainer to="/cart">
                 <Nav.Link className="text-white header-btn position-relative d-flex align-items-center gap-2">

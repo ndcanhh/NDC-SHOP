@@ -172,6 +172,7 @@ body {
   margin-top: 8px !important;
   min-width: 180px;
   overflow: hidden;
+  position: absolute !important;
 }
 
 /* Ẩn gạch phân cách giữa các mục */
@@ -408,4 +409,24 @@ body {
 .profile-custom-tabs .nav-link.active {
   color: #d70018 !important; /* Đỏ khi đang chọn */
   font-weight: 700;          /* Đậm lên để dễ nhận diện */
+}
+
+/* ================== TOAST NOTIFICATION MOBILE ================== */
+@media (max-width: 768px) {
+  .Toastify__toast-container {
+    top: auto !important;
+    bottom: 100px !important; /* Nằm ngay trên icon chatbot (bottom 30px + height 60px) */
+    right: 15px !important;
+    left: auto !important;
+    transform: none !important;
+    width: 260px !important; /* Bóp hẹp chiều ngang để ép chữ rớt thành nhiều dòng */
+    margin-bottom: 0 !important;
+  }
+  
+  /* Đảm bảo chữ bên trong sẽ tự động bẻ dòng */
+  .Toastify__toast-body {
+    white-space: normal !important;
+    word-break: break-word !important;
+    line-height: 1.4 !important;
+  }
 }

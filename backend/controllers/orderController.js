@@ -41,15 +41,11 @@ const createOrder = asyncHandler(async (req, res) => {
     for (const item of orderItems) {
         const product = await Product.findById(item.product);
         if (product) {
-            // Nếu item có biến thể ROM → trừ tồn kho của biến thể
             if (item.storageLabel && product.storageVariants && product.storageVariants.length > 0) {
                 const variant = product.storageVariants.find(v => v.label === item.storageLabel);
                 if (variant) {
                     variant.countInStock = Math.max(0, variant.countInStock - item.qty);
                 }
-            } else {
-                // Sản phẩm không có biến thể → trừ tồn kho gốc
-                product.countInStock = Math.max(0, product.countInStock - item.qty);
             }
             await product.save();
         }
@@ -90,7 +86,10 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
             for (const item of order.orderItems) {
                 const product = await Product.findById(item.product);
                 if (product) {
-                    product.countInStock += item.qty;
+                    if (item.storageLabel && product.storageVariants && product.storageVariants.length > 0) {
+                        const variant = product.storageVariants.find(v => v.label === item.storageLabel);
+                        if (variant) variant.countInStock += item.qty;
+                    }
                     await product.save();
                 }
             }
@@ -101,8 +100,10 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
             for (const item of order.orderItems) {
                 const product = await Product.findById(item.product);
                 if (product) {
-                    product.countInStock -= item.qty;
-                    if (product.countInStock < 0) product.countInStock = 0;
+                    if (item.storageLabel && product.storageVariants && product.storageVariants.length > 0) {
+                        const variant = product.storageVariants.find(v => v.label === item.storageLabel);
+                        if (variant) variant.countInStock = Math.max(0, variant.countInStock - item.qty);
+                    }
                     await product.save();
                 }
             }
@@ -161,14 +162,11 @@ const cancelOrder = asyncHandler(async (req, res) => {
         for (const item of order.orderItems) {
             const product = await Product.findById(item.product);
             if (product) {
-                // Nếu item có biến thể ROM → cộng lại tồn kho của biến thể
                 if (item.storageLabel && product.storageVariants && product.storageVariants.length > 0) {
                     const variant = product.storageVariants.find(v => v.label === item.storageLabel);
                     if (variant) {
                         variant.countInStock += item.qty;
                     }
-                } else {
-                    product.countInStock += item.qty;
                 }
                 await product.save();
             }

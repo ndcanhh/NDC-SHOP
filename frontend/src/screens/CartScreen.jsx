@@ -5,6 +5,7 @@ import { FaTrash, FaMinus, FaPlus } from 'react-icons/fa';
 import { CartContext } from '../context/cartContextDef';
 import { AuthContext } from '../context/authContextValue';
 import { optimizeCloudinaryUrl } from '../utils/imageUtils';
+import { toast } from 'react-toastify';
 
 
 const CartScreen = () => {
@@ -18,6 +19,15 @@ const CartScreen = () => {
 
   // Tổng tiền = giá × số lượng từng món
   const totalPrice = cartItems.reduce((acc, item) => acc + item.price * (item.qty || 1), 0);
+
+  // Hàm tăng số lượng — báo lỗi nếu đã đạt giới hạn tồn kho
+  const handleIncreaseQty = (item) => {
+    if (item.qty >= item.countInStock) {
+      toast.error(`Chỉ còn ${item.countInStock} sản phẩm trong kho!`);
+      return;
+    }
+    updateQty(item._id, item.qty + 1, item.color, item.storageLabel);
+  };
 
   return (
     <Row>
@@ -33,14 +43,14 @@ const CartScreen = () => {
           <ListGroup variant="flush" className="shadow-sm rounded border">
             {cartItems.map((item, index) => (
               <ListGroup.Item key={`${item._id}_${item.color || ''}_${item.storageLabel || ''}_${index}`} className="p-3">
-                <Row className="align-items-center">
+                <Row className="align-items-center text-center text-md-start">
                   {/* Ảnh sản phẩm */}
-                  <Col md={2}>
+                  <Col md={2} className="mb-2 mb-md-0">
                     <Image src={optimizeCloudinaryUrl(item.image, 100, 100)} alt={item.name} fluid rounded />
                   </Col>
                   
                   {/* Tên sản phẩm + biến thể */}
-                  <Col md={3}>
+                  <Col md={3} className="mb-2 mb-md-0">
                     <Link to={`/product/${item._id}`} className="text-dark text-decoration-none fw-bold">
                       {item.name}
                     </Link>
@@ -53,12 +63,12 @@ const CartScreen = () => {
                   </Col>
                   
                   {/* Đơn giá */}
-                  <Col md={2} className="text-brand-red fw-bold text-center">
+                  <Col md={2} className="text-brand-red fw-bold text-center mb-2 mb-md-0">
                     {item.price.toLocaleString('vi-VN')} đ
                   </Col>
 
                   {/* Nút tăng/giảm số lượng */}
-                  <Col md={3} className="text-center">
+                  <Col md={3} className="text-center mb-2 mb-md-0">
                     <div className="d-flex align-items-center justify-content-center gap-2">
                       <Button
                         variant="outline-secondary"
@@ -77,19 +87,22 @@ const CartScreen = () => {
                       <Button
                         variant="outline-secondary"
                         size="sm"
-                        disabled={item.qty >= item.countInStock}
-                        onClick={() => updateQty(item._id, item.qty + 1, item.color, item.storageLabel)}
+                        onClick={() => handleIncreaseQty(item)}
                         style={{ width: '32px', height: '32px', padding: 0 }}
                       >
                         <FaPlus size={10} />
                       </Button>
                     </div>
-                    {/* Hiển thị số lượng tồn kho */}
-                    <small className="text-muted">Kho: {item.countInStock}</small>
+                    {/* Hiển thị khi đang ở mức tối đa */}
+                    {item.qty >= item.countInStock && (
+                      <small className="text-warning fw-bold d-block mt-1">
+                        Đã đạt giới hạn tồn kho
+                      </small>
+                    )}
                   </Col>
                   
                   {/* Nút xóa */}
-                  <Col md={2} className="text-end">
+                  <Col md={2} className="text-center text-md-end">
                     <Button 
                         variant="light" 
                         className="text-danger" 

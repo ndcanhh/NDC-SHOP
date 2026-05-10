@@ -19,11 +19,7 @@ const productSchema = mongoose.Schema({
         required: true, 
         default: 0 // Giá bán (mặc định là 0 nếu quên nhập) 
     },
-    countInStock: { 
-        type: Number, 
-        required: true, 
-        default: 0 // Số lượng hàng tồn trong kho
-    },
+
     isHidden: {
         type: Boolean,
         default: false // Cờ ẩn sản phẩm khỏi website (dành cho admin)

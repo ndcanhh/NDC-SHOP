@@ -91,7 +91,7 @@ const ProductCategoryScreen = () => {
           <p className="text-muted mb-3">Hiển thị <strong>{filteredProducts.length}</strong> sản phẩm</p>
           <Row className="g-2">
             {filteredProducts.map((product) => (
-              <Col key={product._id} sm={6} md={6} lg={4} xl={3} className="d-flex align-items-stretch py-1">
+              <Col key={product._id} xs={6} sm={6} md={4} lg={4} className="d-flex align-items-stretch py-1" style={{ flex: '0 0 20%', maxWidth: '20%' }}>
                 <Product product={product} />
               </Col>
             ))}

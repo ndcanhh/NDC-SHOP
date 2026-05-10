@@ -3,7 +3,7 @@ const router = express.Router();
 const { authUser, registerUser, updateProfile, updatePassword, getUsers, deleteUser } = require('../controllers/userController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
-// Route gốc: POST thì tạo khách mới, GET thì lấy danh sách (chỉ Admin)
+// POST thì tạo khách mới, GET thì lấy danh sách (chỉ Admin)
 router.route('/')
     .post(registerUser)
     .get(protect, admin, getUsers);

@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import { Card, Button, Badge } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { CartContext } from '../context/cartContextDef';
+import { AuthContext } from '../context/authContextValue';
 import { FaCartPlus } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import { optimizeCloudinaryUrl } from '../utils/imageUtils';
@@ -11,7 +12,7 @@ const getBadgeVariant = (tag) => {
   const lowerTag = tag.toLowerCase();
   if (lowerTag.includes('hot')) return 'danger';
   if (lowerTag.includes('mới')) return 'success';
-  if (lowerTag.includes('gaming')) return 'purple'; // Cần thêm class .bg-purple trong CSS nếu chưa có, tạm dùng 'dark' nếu không chắc
+  if (lowerTag.includes('gaming')) return 'dark';
   if (lowerTag.includes('pin trâu')) return 'warning';
   if (lowerTag.includes('giá rẻ')) return 'info';
   return 'secondary';
@@ -19,23 +20,66 @@ const getBadgeVariant = (tag) => {
 
 const Product = ({ product }) => {
   const { addToCart } = useContext(CartContext);
+  const { userInfo } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  const defaultColor = product.colorVariants && product.colorVariants.length > 0 ? product.colorVariants[0] : null;
+  const defaultStorage = product.storageVariants && product.storageVariants.length > 0 ? 
+    product.storageVariants.reduce((min, v) => v.price < min.price ? v : min, product.storageVariants[0]) : null;
+
+  const displayStock = defaultStorage ? defaultStorage.countInStock : 0;
+
   const handleAddToCart = () => {
-    addToCart(product);
-    toast.success('Đã thêm ' + product.name + ' vào giỏ hàng!');
+    if (!userInfo) {
+      toast.warning('Vui lòng đăng nhập để thêm vào giỏ hàng!');
+      navigate('/login');
+      return;
+    }
+
+    const cartItem = {
+      ...product,
+      price: defaultStorage ? defaultStorage.price : product.price,
+      countInStock: defaultStorage ? defaultStorage.countInStock : 0,
+      image: defaultColor ? defaultColor.image : product.image,
+      color: defaultColor ? defaultColor.color : null,
+      storageLabel: defaultStorage ? defaultStorage.label : null,
+    };
+
+    const success = addToCart(cartItem);
+    if (success) {
+      toast.success('Đã thêm ' + product.name + ' vào giỏ hàng!');
+    } else {
+      toast.error('Số lượng trong giỏ hàng đã đạt giới hạn tồn kho!');
+    }
   };
 
   const handleBuyNow = () => {
-    addToCart(product);
+    if (!userInfo) {
+      toast.warning('Vui lòng đăng nhập để mua hàng!');
+      navigate('/login');
+      return;
+    }
+
+    const cartItem = {
+      ...product,
+      price: defaultStorage ? defaultStorage.price : product.price,
+      countInStock: defaultStorage ? defaultStorage.countInStock : 0,
+      image: defaultColor ? defaultColor.image : product.image,
+      color: defaultColor ? defaultColor.color : null,
+      storageLabel: defaultStorage ? defaultStorage.label : null,
+    };
+
+    const success = addToCart(cartItem);
+    if (!success) {
+      toast.error('Số lượng trong giỏ hàng đã đạt giới hạn tồn kho!');
+    }
     navigate('/checkout');
   };
 
-  // Phần trăm giảm giá lấy từ DB (mặc định 20% nếu chưa có)
-  const discount = product.discount ?? 20;
+  // Phần trăm giảm giá lấy từ DB
+  const discount = product.discount || 0;
 
-  // Giá gốc (chưa giảm) = giá bán hiện tại / (1 - discount%)
-  // VD: giá bán 800k, giảm 20% → giá gốc = 800k / 0.8 = 1.000k
+  // Giá gốc = giá bán hiện tại / (1 - discount%)
   const oldPrice = discount > 0 ? Math.round(product.price / (1 - discount / 100)) : product.price;
 
   return (
@@ -89,24 +133,30 @@ const Product = ({ product }) => {
         </div>
 
         <div className="d-flex gap-2 mt-auto">
-          <Button 
-            variant="danger" 
-            className="buy-btn flex-grow-1 m-0" 
-            onClick={handleBuyNow} 
-            disabled={product.countInStock === 0}
-          >
-            {product.countInStock === 0 ? 'Hết hàng' : 'MUA NGAY'}
-          </Button>
-          <Button 
-            variant="outline-danger" 
-            className="flex-shrink-0" 
-            style={{ width: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px' }}
-            onClick={handleAddToCart} 
-            disabled={product.countInStock === 0} 
-            title="Thêm vào giỏ hàng"
-          >
-            <FaCartPlus size={18} />
-          </Button>
+          {displayStock === 0 ? (
+            <Button variant="secondary" className="flex-grow-1 m-0" disabled>
+              Hết hàng
+            </Button>
+          ) : (
+            <>
+              <Button 
+                variant="danger" 
+                className="buy-btn flex-grow-1 m-0" 
+                onClick={handleBuyNow} 
+              >
+                MUA NGAY
+              </Button>
+              <Button 
+                variant="outline-danger" 
+                className="flex-shrink-0" 
+                style={{ width: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px' }}
+                onClick={handleAddToCart} 
+                title="Thêm vào giỏ hàng"
+              >
+                <FaCartPlus size={18} />
+              </Button>
+            </>
+          )}
         </div>
       </Card.Body>
     </Card>

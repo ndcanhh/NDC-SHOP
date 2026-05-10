@@ -81,14 +81,14 @@ const searchProducts = async (req, res) => {
 // @access  Private/Admin
 const createProduct = async (req, res) => {
     try {
-        const { name, price, description, image, brand, countInStock, discount, specs, isHidden, tags, colorVariants, storageVariants } = req.body;
+        const { name, price, description, image, brand, discount, specs, isHidden, tags, colorVariants, storageVariants } = req.body;
 
         const product = new Product({
             name: name || 'Sản phẩm mới',
             price: price || 0,
             image: image || '/images/sample.jpg',
             brand: brand || 'Chưa rõ',
-            countInStock: countInStock || 0,
+
             discount: discount || 0,
             tags: tags || [],
             colorVariants: colorVariants || [],
@@ -110,7 +110,7 @@ const createProduct = async (req, res) => {
 // @access  Private/Admin
 const updateProduct = async (req, res) => {
     try {
-        const { name, price, description, image, brand, countInStock, discount, specs, isHidden, tags, colorVariants, storageVariants } = req.body;
+        const { name, price, description, image, brand, discount, specs, isHidden, tags, colorVariants, storageVariants } = req.body;
         const product = await Product.findById(req.params.id);
 
         if (product) {
@@ -119,7 +119,7 @@ const updateProduct = async (req, res) => {
             product.description = description || product.description;
             product.image = image || product.image;
             product.brand = brand || product.brand;
-            product.countInStock = countInStock !== undefined ? countInStock : product.countInStock;
+
             product.discount = discount !== undefined ? discount : product.discount;
             product.isHidden = isHidden !== undefined ? isHidden : product.isHidden;
             if (tags !== undefined) product.tags = tags;

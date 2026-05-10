@@ -15,8 +15,8 @@ const shuffleArray = (arr) => {
   return shuffled;
 };
 
-// Số sản phẩm mỗi hàng (4 cột xl) x 2 hàng = 8 sản phẩm
-const ITEMS_PER_SECTION = 8;
+// Số sản phẩm mỗi hàng (5 cột xl) x 2 hàng = 10 sản phẩm
+const ITEMS_PER_SECTION = 10;
 
 // Component tái sử dụng cho mỗi Section (Khai báo bên ngoài để tránh re-create mỗi lần render)
 const ProductSection = ({ title, icon, products: sectionProducts, linkTo, accentColor }) => (
@@ -36,7 +36,7 @@ const ProductSection = ({ title, icon, products: sectionProducts, linkTo, accent
       <>
         <Row className="g-2">
           {sectionProducts.map((product) => (
-            <Col key={product._id} sm={6} md={6} lg={4} xl={3} className="d-flex align-items-stretch py-1">
+            <Col key={product._id} xs={6} sm={6} md={6} lg={4}  className="d-flex align-items-stretch py-1" style={{ flex: '0 0 20%', maxWidth: '20%' }}>
               <Product product={product} />
             </Col>
           ))}
