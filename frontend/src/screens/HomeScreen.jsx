@@ -36,7 +36,7 @@ const ProductSection = ({ title, icon, products: sectionProducts, linkTo, accent
       <>
         <Row className="g-2">
           {sectionProducts.map((product) => (
-            <Col key={product._id} xs={6} sm={6} md={6} lg={4}  className="d-flex align-items-stretch py-1" style={{ flex: '0 0 20%', maxWidth: '20%' }}>
+            <Col key={product._id} xs={6} sm={6} md={6} lg={4} className="d-flex align-items-stretch py-1 col-5-grid">
               <Product product={product} />
             </Col>
           ))}
