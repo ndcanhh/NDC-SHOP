@@ -58,9 +58,21 @@ const createOrder = asyncHandler(async (req, res) => {
 // @route   GET /api/orders/myorders
 // @access  Private (cần đăng nhập)
 const getMyOrders = asyncHandler(async (req, res) => {
-    // Tìm tất cả đơn hàng thuộc về user này, sắp xếp mới nhất lên đầu
     const orders = await Order.find({ user: req.user._id }).sort({ createdAt: -1 });
     res.json(orders);
+});
+
+// @desc    Lấy chi tiết 1 đơn hàng theo ID (của chính mình)
+// @route   GET /api/orders/:id
+// @access  Private
+const getOrderById = asyncHandler(async (req, res) => {
+    const order = await Order.findById(req.params.id);
+    if (order && order.user.toString() === req.user._id.toString()) {
+        res.json(order);
+    } else {
+        res.status(404);
+        throw new Error('Không tìm thấy đơn hàng!');
+    }
 });
 
 // @desc    Lấy danh sách tất cả đơn hàng (Cho Admin)
@@ -179,4 +191,4 @@ const cancelOrder = asyncHandler(async (req, res) => {
     }
 });
 
-module.exports = { createOrder, getMyOrders, getOrders, updateOrderStatus, cancelOrder };
+module.exports = { createOrder, getMyOrders, getOrderById, getOrders, updateOrderStatus, cancelOrder };

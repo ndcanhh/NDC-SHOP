@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { Row, Col, Card, Badge, Spinner } from 'react-bootstrap';
-import { FaBox, FaCheckCircle, FaArrowLeft } from 'react-icons/fa';
+import { FaBox, FaCheckCircle, FaArrowLeft, FaEye } from 'react-icons/fa';
 import axios from 'axios';
 import { AuthContext } from '../context/authContextValue';
 import { toast } from 'react-toastify';
@@ -196,44 +196,63 @@ const OrderScreen = () => {
                     {/* Tổng tiền */}
                     <Col md={2} className="text-center">
                       <small className="text-muted d-block">Tổng tiền</small>
-                      <span className="text-danger fw-bold">
+                      <span className="text-danger fw-bold text-nowrap">
                         {order.totalPrice.toLocaleString('vi-VN')} đ
                       </span>
                     </Col>
 
-                    {/* Trạng thái */}
-                    <Col md={3} className="text-center d-flex flex-column gap-2 align-items-center">
-                      <Badge bg={getStatusBadge(order.status)} className="px-3 py-2 w-100" style={{ maxWidth: '180px', fontSize: '12px', whiteSpace: 'normal' }}>
-                        {order.status}
-                      </Badge>
-                      {order.paymentMethod === 'VNPay' && order.status !== 'Đã hủy' && (
-                        <Badge bg={order.isPaid ? 'success' : 'secondary'} className="px-3 py-2 w-100" style={{ maxWidth: '150px' }}>
-                          {order.isPaid ? 'Đã Thanh Toán' : 'Chưa Thanh Toán'}
+                    {/* Trạng thái + Hành động */}
+                    <Col md={3} className="d-flex align-items-center justify-content-between gap-2">
+                      {/* Cột badge + nút */}
+                      <div className="d-flex flex-column gap-2 flex-grow-1">
+                        <Badge
+                          bg={getStatusBadge(order.status)}
+                          className="px-2 py-2 text-center"
+                          style={{ fontSize: '12px', whiteSpace: 'normal' }}
+                        >
+                          {order.status}
                         </Badge>
-                      )}
-                      {!order.isPaid && order.paymentMethod === 'VNPay' && order.status !== 'Đã hủy' && (
-                        <button 
-                          onClick={() => handleVNPayRetry(order._id)}
-                          className="btn btn-sm btn-outline-danger w-100" 
-                          style={{ maxWidth: '150px', fontSize: '13px' }}
-                        >
-                          Thanh toán lại
-                        </button>
-                      )}
+                        {order.paymentMethod === 'VNPay' && order.status !== 'Đã hủy' && (
+                          <Badge
+                            bg={order.isPaid ? 'success' : 'secondary'}
+                            className="px-2 py-2 text-center"
+                            style={{ fontSize: '12px' }}
+                          >
+                            {order.isPaid ? 'Đã Thanh Toán' : 'Chưa Thanh Toán'}
+                          </Badge>
+                        )}
+                        {!order.isPaid && order.paymentMethod === 'VNPay' && order.status !== 'Đã hủy' && (
+                          <button
+                            onClick={() => handleVNPayRetry(order._id)}
+                            className="btn btn-sm btn-outline-danger"
+                            style={{ fontSize: '12px' }}
+                          >
+                            Thanh toán lại
+                          </button>
+                        )}
+                        {order.status !== 'Đã hủy' && order.status !== 'Đã giao thành công' && (
+                          (order.paymentMethod === 'COD' && order.status === 'Chờ xử lý') ||
+                          (order.paymentMethod === 'VNPay' && !order.isPaid)
+                        ) && (
+                          <button
+                            onClick={() => cancelOrderHandler(order._id)}
+                            className="btn btn-sm btn-danger"
+                            style={{ fontSize: '12px' }}
+                          >
+                            Hủy đơn hàng
+                          </button>
+                        )}
+                      </div>
 
-                      {/* Nút Hủy đơn hàng */}
-                      {order.status !== 'Đã hủy' && order.status !== 'Đã giao thành công' && (
-                        (order.paymentMethod === 'COD' && order.status === 'Chờ xử lý') || 
-                        (order.paymentMethod === 'VNPay' && !order.isPaid)
-                      ) && (
-                        <button 
-                          onClick={() => cancelOrderHandler(order._id)}
-                          className="btn btn-sm btn-danger w-100 mt-1" 
-                          style={{ maxWidth: '150px', fontSize: '13px' }}
-                        >
-                          Hủy đơn hàng
-                        </button>
-                      )}
+                      {/* Icon Xem chi tiết — góc phải */}
+                      <Link
+                        to={`/orders/${order._id}`}
+                        title="Xem chi tiết đơn hàng"
+                        className="btn btn-light border"
+                        style={{ padding: '6px 8px', flexShrink: 0 }}
+                      >
+                        <FaEye size={16} className="text-secondary" />
+                      </Link>
                     </Col>
                   </Row>
 

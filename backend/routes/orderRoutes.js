@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createOrder, getMyOrders, getOrders, updateOrderStatus, cancelOrder } = require('../controllers/orderController');
+const { createOrder, getMyOrders, getOrderById, getOrders, updateOrderStatus, cancelOrder } = require('../controllers/orderController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
 // POST /api/orders — Tạo đơn hàng (cần đăng nhập)
@@ -14,6 +14,9 @@ router.get('/myorders', protect, getMyOrders);
 
 // PUT /api/orders/:id/cancel — Hủy đơn hàng (Người dùng)
 router.put('/:id/cancel', protect, cancelOrder);
+
+// GET /api/orders/:id — Xem chi tiết 1 đơn hàng (của chính mình)
+router.get('/:id', protect, getOrderById);
 
 // PUT /api/orders/:id/status — Cập nhật trạng thái đơn hàng (chỉ Admin)
 router.route('/:id/status')

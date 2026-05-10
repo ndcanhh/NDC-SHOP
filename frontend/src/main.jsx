@@ -21,6 +21,7 @@ import CheckoutScreen from './screens/CheckoutScreen.jsx'
 import OrderScreen from './screens/OrderScreen.jsx'
 import CompareScreen from './screens/CompareScreen.jsx'
 import ProductCategoryScreen from './screens/ProductCategoryScreen.jsx'
+import OrderDetailScreen from './screens/OrderDetailScreen.jsx'
 
 // Import các trang dành cho Admin
 import AdminRoute from './components/AdminRoute.jsx'
@@ -60,6 +61,7 @@ const router = createBrowserRouter(
          <Route path='/orders' element={<OrderScreen />} />
          <Route path='/compare' element={<CompareScreen />} />
          <Route path='/products/:category' element={<ProductCategoryScreen />} />
+         <Route path='/orders/:id' element={<OrderDetailScreen />} />
       </Route>
 
       {/* 2. LAYOUT CHO ADMIN (Giao diện riêng, Logo ngang) */}
