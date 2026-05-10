@@ -284,6 +284,16 @@ body {
   display: flex;
   align-items: baseline;
   gap: 10px;
+  min-height: 27px; /* Luôn giữ chỗ cho giá cũ/giảm giá */
+}
+
+.product-tags {
+  min-height: 23px; /* Luôn giữ chỗ cho Tag */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 4px;
+  padding: 0 8px;
 }
 
 .price-current {

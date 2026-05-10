@@ -96,10 +96,10 @@ const Product = ({ product }) => {
       </Link>
 
       <Card.Body className="d-flex flex-column p-0 pt-2">
-        {/* Render Tags */}
-        {product.tags && product.tags.length > 0 && (
-          <div className="mb-1 d-flex flex-wrap gap-1 px-2">
-            {product.tags.map((tag, idx) => (
+        {/* Render Tags (Luôn giữ khung để căn lề) */}
+        <div className="product-tags">
+          {product.tags && product.tags.length > 0 && (
+            product.tags.map((tag, idx) => (
               <Badge 
                 key={idx} 
                 bg={getBadgeVariant(tag)}
@@ -107,9 +107,9 @@ const Product = ({ product }) => {
               >
                 {tag}
               </Badge>
-            ))}
-          </div>
-        )}
+            ))
+          )}
+        </div>
 
         <Link to={`/product/${product._id}`} style={{ textDecoration: 'none' }}>
           <Card.Title as='div' className='product-title'>
