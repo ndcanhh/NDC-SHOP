@@ -127,7 +127,7 @@ const CartScreen = () => {
             <ListGroup.Item>
               <div className="d-flex justify-content-between my-2">
                 <span>Tổng số lượng:</span>
-                <span className="fw-bold">{totalQty} món</span>
+                <span className="fw-bold">{totalQty} sản phẩm</span>
               </div>
               <div className="d-flex justify-content-between my-2">
                 <span>Thành tiền:</span>
