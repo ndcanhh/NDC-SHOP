@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { Row, Col, Card, Badge, Spinner } from 'react-bootstrap';
 import { FaBox, FaCheckCircle, FaArrowLeft, FaEye } from 'react-icons/fa';
 import axios from 'axios';
-import { AuthContext } from '../context/authContextValue';
+import { AuthContext } from '../../context/authContextValue';
 import { toast } from 'react-toastify';
 
 const OrderScreen = () => {

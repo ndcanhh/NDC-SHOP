@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Form, Button, Row, Col, Card } from 'react-bootstrap';
-import { AuthContext } from '../context/authContextValue';
+import { AuthContext } from '../../context/authContextValue';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');

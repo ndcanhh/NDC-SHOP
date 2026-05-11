@@ -3,9 +3,9 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Row, Col, Card, Badge, ListGroup, Spinner, Alert, Image, Button } from 'react-bootstrap';
 import { FaBox, FaArrowLeft, FaMapMarkerAlt, FaCreditCard, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import axios from 'axios';
-import { AuthContext } from '../context/authContextValue';
+import { AuthContext } from '../../context/authContextValue';
 import { toast } from 'react-toastify';
-import { optimizeCloudinaryUrl } from '../utils/imageUtils';
+import { optimizeCloudinaryUrl } from '../../utils/imageUtils';
 
 const OrderDetailScreen = () => {
   const { id } = useParams();

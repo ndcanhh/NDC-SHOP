@@ -1,10 +1,10 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { Row, Col, Card, Form, Button, Spinner, Tabs, Tab } from 'react-bootstrap';
 import { FaUser, FaEnvelope, FaPhone, FaLock, FaSave, FaKey, FaMapMarkerAlt } from 'react-icons/fa';
-import { AuthContext } from '../context/authContextValue';
+import { AuthContext } from '../../context/authContextValue';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import AddressBook from '../components/AddressBook';
+import AddressBook from '../../components/AddressBook';
 
 const ProfileScreen = () => {
   const { userInfo, setUserInfo } = useContext(AuthContext);
