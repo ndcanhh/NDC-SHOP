@@ -1,289 +1,261 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Row, Col, Image, ListGroup, Card, Button, Spinner, Alert, Badge } from 'react-bootstrap';
+import { Row, Col, Image, ListGroup, Card, Button, Spinner, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import { CartContext } from '../context/cartContextDef';
-import { AuthContext } from '../context/authContextValue';
-import { FaCartPlus } from 'react-icons/fa';
+import { FaCartPlus, FaMinus, FaPlus } from 'react-icons/fa';
 import { toast } from 'react-toastify';
-import { optimizeCloudinaryUrl } from '../utils/imageUtils';
-
-// Hàm tiện ích: Chọn màu sắc nổi bật cho các Tag phổ biến
-const getBadgeVariant = (tag) => {
-  const lowerTag = tag.toLowerCase();
-  if (lowerTag.includes('hot')) return 'danger';
-  if (lowerTag.includes('mới')) return 'success';
-  if (lowerTag.includes('gaming')) return 'purple';
-  if (lowerTag.includes('pin trâu')) return 'warning';
-  if (lowerTag.includes('giá rẻ')) return 'info';
-  return 'secondary';
-};
 
 const ProductScreen = () => {
   const { id: productId } = useParams();
   const [product, setProduct] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [qty, setQty] = useState(1);
   const navigate = useNavigate();
 
-  // Biến thể đang chọn
+  const [selectedVariant, setSelectedVariant] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
-  const [selectedStorage, setSelectedStorage] = useState(null);
 
-  // Gọi hàm addToCart từ Thủ kho
   const { addToCart } = useContext(CartContext);
-  const { userInfo } = useContext(AuthContext);
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         const { data } = await axios.get(`/api/products/${productId}`);
         setProduct(data);
-        // Tự động chọn biến thể đầu tiên nếu có
-        if (data.colorVariants && data.colorVariants.length > 0) {
-          setSelectedColor(data.colorVariants[0]);
+        if (data.variants && data.variants.length > 0) {
+            const firstAvailable = data.variants.find(v => v.countInStock > 0) || data.variants[0];
+            setSelectedVariant(firstAvailable);
+            setSelectedColor(firstAvailable.color);
         }
-        if (data.storageVariants && data.storageVariants.length > 0) {
-          const lowestPriceVariant = data.storageVariants.reduce((min, v) => v.price < min.price ? v : min, data.storageVariants[0]);
-          setSelectedStorage(lowestPriceVariant);
-        }
+        setLoading(false);
       } catch (err) {
-        setError('Không tìm thấy sản phẩm hoặc đã có lỗi xảy ra!');
-        console.error('Lỗi khi tải chi tiết sản phẩm:', err);
+        setError(err.response?.data?.message || err.message);
+        setLoading(false);
       }
-      setLoading(false);
     };
-
     fetchProduct();
   }, [productId]);
 
-  // Giá hiển thị: Ưu tiên biến thể ROM đang chọn, fallback về giá gốc
-  const displayPrice = selectedStorage ? selectedStorage.price : product.price;
+  const uniqueColors = product.variants 
+    ? [...new Map(product.variants.map(v => [v.color, v])).values()]
+    : [];
 
-  const displayStock = selectedStorage ? selectedStorage.countInStock : 0;
+  const availableStorages = product.variants
+    ? product.variants.filter(v => v.color === selectedColor)
+    : [];
 
-  // Ảnh hiển thị: Ưu tiên biến thể màu, fallback về ảnh gốc
-  const displayImage = selectedColor ? selectedColor.image : product.image;
-
-  // Hàm xử lý khi khách bấm nút "Thêm vào giỏ hàng" từ trang Chi tiết
   const handleAddToCart = () => {
-    if (!userInfo) {
-      toast.warning('Vui lòng đăng nhập để thêm vào giỏ hàng!');
-      navigate('/login');
-      return;
+    if (!selectedVariant) {
+        toast.error('Vui lòng chọn phiên bản!');
+        return;
     }
-    const cartItem = {
-      ...product,
-      price: displayPrice,
-      countInStock: displayStock,
-      image: displayImage,
-      color: selectedColor?.color || null,
-      storageLabel: selectedStorage?.label || null,
-    };
-    const success = addToCart(cartItem);
-    if (success) {
-      toast.success(`Đã thêm ${product.name} vào giỏ hàng!`);
-    } else {
-      toast.error(`Chỉ còn ${displayStock} sản phẩm trong kho, bạn đã thêm đủ số lượng!`);
-    }
+    addToCart({ 
+        ...product, 
+        price: selectedVariant.price,
+        countInStock: selectedVariant.countInStock,
+        color: selectedVariant.color,
+        storageLabel: `${selectedVariant.ram} / ${selectedVariant.rom}`,
+        image: selectedVariant.image
+    }, qty);
+    toast.success(`Đã thêm ${qty} sản phẩm vào giỏ hàng!`);
   };
 
   const handleBuyNow = () => {
-    if (!userInfo) {
-      toast.warning('Vui lòng đăng nhập để mua hàng!');
-      navigate('/login');
-      return;
-    }
-    const cartItem = {
-      ...product,
-      price: displayPrice,
-      countInStock: displayStock,
-      image: displayImage,
-      color: selectedColor?.color || null,
-      storageLabel: selectedStorage?.label || null,
-    };
-    const success = addToCart(cartItem);
-    if (!success) {
-      toast.error('Số lượng trong giỏ hàng đã đạt giới hạn tồn kho!');
-    }
-    navigate('/checkout');
+    handleAddToCart();
+    navigate('/cart');
   };
 
+  // Logic hiển thị trạng thái tồn kho
+  const getStockStatus = () => {
+    if (!selectedVariant || selectedVariant.countInStock <= 0) {
+        return <span className="text-danger fw-bold">Hết hàng</span>;
+    }
+    if (selectedVariant.countInStock < 5) {
+        return <span className="text-danger fw-bold">Chỉ còn {selectedVariant.countInStock} máy</span>;
+    }
+    return <span className="text-success fw-bold">Còn hàng</span>;
+  };
+
+  if (loading) return <div className="text-center p-5"><Spinner animation="border" variant="danger" /></div>;
+  if (error) return <Alert variant="danger">{error}</Alert>;
+
   return (
-    <>
-      <Link className="btn btn-light my-3 border shadow-sm rounded-pill px-4" to="/">
-        Quay lại trang chủ
-      </Link>
+    <div className="product-screen-custom py-4" style={{ backgroundColor: '#f4f4f4', minHeight: '100vh' }}>
+      <style>{`
+        .color-circle-option {
+            transition: all 0.2s ease-in-out;
+        }
+        .color-circle-option:hover {
+            transform: scale(1.15);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            z-index: 10;
+        }
+        .btn-version:hover:not(:disabled) {
+            border-color: #d70018 !important;
+            color: #d70018 !important;
+        }
+      `}</style>
 
-      {loading ? (
-        <div className="text-center py-5">
-          <Spinner animation="border" variant="danger" />
-          <p className="mt-2 text-muted">Đang tải sản phẩm...</p>
-        </div>
-      ) : error ? (
-        <Alert variant="danger" className="text-center">{error}</Alert>
-      ) : (
-      
-      <Row>
-        <Col md={5}>
-          <Image 
-            src={optimizeCloudinaryUrl(displayImage, 600, 600)} 
-            alt={product.name} 
-            fluid 
-            className="rounded-4 shadow-sm bg-white" 
-          />
-        </Col>
+      <div className="container">
+        <Link className="btn btn-white shadow-sm rounded-pill px-4 mb-4 fw-medium border" to="/">
+          Quay lại trang chủ
+        </Link>
 
-        <Col md={4}>
-          <Card className="border-0 shadow-sm rounded-4 overflow-hidden mb-4">
-          <ListGroup variant="flush">
-            <ListGroup.Item className="p-4 border-bottom">
-              <h3>{product.name}</h3>
-              {product.tags && product.tags.length > 0 && (
-                <div className="mt-2 d-flex flex-wrap gap-2">
-                  {product.tags.map((tag, idx) => (
-                    <Badge 
-                      key={idx} 
-                      bg={getBadgeVariant(tag)}
-                      className="rounded-pill px-3 py-1 shadow-sm"
-                      style={getBadgeVariant(tag) === 'purple' ? { backgroundColor: '#6f42c1', fontSize: '13px' } : { fontSize: '13px' }}
-                    >
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </ListGroup.Item>
+        <Row className="g-4">
+          <Col lg={4} md={5}>
+            <Card className="border-0 shadow-sm rounded-4 overflow-hidden bg-white h-100 d-flex align-items-center justify-content-center p-3">
+              <Image 
+                src={selectedVariant?.image || product.image} 
+                alt={product.name} 
+                fluid 
+                style={{ maxHeight: '450px', objectFit: 'contain' }}
+              />
+            </Card>
+          </Col>
 
-            {/* Bộ chọn Màu sắc */}
-            {product.colorVariants && product.colorVariants.length > 0 && (
-              <ListGroup.Item className="p-4 border-bottom">
-                <strong>Màu sắc:</strong>
-                <div className="d-flex flex-wrap gap-2 mt-2">
-                  {product.colorVariants.map((cv, idx) => (
-                    <button
-                      key={idx}
-                      title={cv.color}
-                      onClick={() => setSelectedColor(cv)}
-                      className="border-0 p-0"
-                      style={{
-                        width: '36px', height: '36px', borderRadius: '50%',
-                        backgroundColor: cv.colorCode,
-                        cursor: 'pointer',
-                        outline: selectedColor?._id === cv._id || selectedColor?.color === cv.color
-                          ? '3px solid #dc3545' : '2px solid #ccc',
-                        outlineOffset: '2px',
-                        transition: 'outline 0.2s ease'
-                      }}
-                    />
-                  ))}
-                </div>
-                {selectedColor && (
-                  <small className="text-muted mt-1 d-block">Đã chọn: {selectedColor.color}</small>
-                )}
-              </ListGroup.Item>
-            )}
+          <Col lg={5} md={7}>
+            <Card className="border-0 shadow-sm rounded-4 bg-white overflow-hidden h-100">
+              <ListGroup variant="flush">
+                <ListGroup.Item className="p-4 border-bottom-0">
+                  <h2 className="fw-bold text-dark mb-0" style={{ fontSize: '1.8rem' }}>{product.name}</h2>
+                </ListGroup.Item>
 
-            {/* Bộ chọn RAM/ROM */}
-            {product.storageVariants && product.storageVariants.length > 0 && (
-              <ListGroup.Item className="p-4 border-bottom">
-                <strong>Phiên bản:</strong>
-                <div className="d-flex flex-wrap gap-2 mt-2">
-                  {product.storageVariants.map((sv, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setSelectedStorage(sv)}
-                      className={`btn btn-sm ${selectedStorage?.label === sv.label ? 'btn-danger shadow-sm' : 'btn-outline-secondary'}`}
-                      style={{ borderRadius: '12px', minWidth: '120px', transition: 'all 0.2s ease', padding: '8px 12px' }}
-                    >
-                      <div className="fw-bold">{sv.label}</div>
-                      <small>{sv.price?.toLocaleString('vi-VN')} đ</small>
-                    </button>
-                  ))}
-                </div>
-              </ListGroup.Item>
-            )}
+                <ListGroup.Item className="px-4 py-3 border-top">
+                  <div className="fw-bold mb-2">Màu sắc:</div>
+                  <div className="d-flex gap-3 mb-2">
+                    {uniqueColors.map((cv) => (
+                      <div 
+                        key={cv.color}
+                        className={`p-1 rounded-circle border-2 cursor-pointer color-circle-option ${selectedColor === cv.color ? 'border-primary' : 'border-light'}`}
+                        style={{ width: '40px', height: '40px', backgroundColor: 'white' }}
+                        onClick={() => {
+                            setSelectedColor(cv.color);
+                            const firstForColor = product.variants.find(v => v.color === cv.color);
+                            setSelectedVariant(firstForColor);
+                        }}
+                      >
+                        <div className="w-100 h-100 rounded-circle" style={{ backgroundColor: cv.colorCode }} />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="small text-muted">Đã chọn: <span className="fw-bold text-dark">{selectedColor}</span></div>
+                </ListGroup.Item>
 
-            <ListGroup.Item className="p-4 border-bottom">
-                <span className="text-brand-red fw-bold fs-3">{displayPrice?.toLocaleString('vi-VN')} đ</span>
-            </ListGroup.Item>
-            <ListGroup.Item className="p-4 border-bottom">
-              <strong>Đặc điểm nổi bật:</strong> <br/>
-              {product.description}
-            </ListGroup.Item>
-            <ListGroup.Item className="p-4">
-                <strong>Cấu hình chi tiết:</strong>
-                <ul className="mt-2">
-                    <li>RAM: {product.specs?.ram}</li>
-                    <li>ROM: {product.specs?.rom}</li>
+                <ListGroup.Item className="px-4 py-3">
+                  <div className="fw-bold mb-2">Phiên bản:</div>
+                  <Row className="g-2">
+                    {availableStorages.map((sv, idx) => (
+                      <Col xs={6} key={idx}>
+                        <Button
+                          variant="none"
+                          className={`btn-version w-100 text-start p-2 rounded-3 border-2 transition-all ${selectedVariant?._id === sv._id ? 'border-danger bg-danger text-white' : 'border-light bg-light text-dark'}`}
+                          onClick={() => setSelectedVariant(sv)}
+                          disabled={sv.countInStock <= 0}
+                          style={{ fontSize: '0.85rem' }}
+                        >
+                          <div className="fw-bold">{sv.rom}</div>
+                          <div className={selectedVariant?._id === sv._id ? "text-white" : "text-danger"}>
+                            {sv.price.toLocaleString('vi-VN')} đ
+                          </div>
+                        </Button>
+                      </Col>
+                    ))}
+                  </Row>
+                </ListGroup.Item>
+
+                <ListGroup.Item className="px-4 py-3">
+                  <div className="fw-bold mb-2">Đặc điểm nổi bật:</div>
+                  <div className="small text-muted lh-sm">
+                    {product.description?.split('\n').slice(0, 3).join('. ')}...
+                  </div>
+                </ListGroup.Item>
+
+                <ListGroup.Item className="px-4 py-3 bg-light-subtle">
+                  <div className="fw-bold mb-2">Cấu hình chi tiết:</div>
+                  <ul className="small text-muted ps-3 mb-0">
+                    <li>RAM: {selectedVariant?.ram || product.specs?.ram}</li>
+                    <li>ROM: {selectedVariant?.rom || product.specs?.rom}</li>
                     <li>Chip xử lý: {product.specs?.chip}</li>
                     <li>Dung lượng pin: {product.specs?.battery}</li>
-                </ul>
-            </ListGroup.Item>
-          </ListGroup>
-          </Card>
-        </Col>
+                  </ul>
+                </ListGroup.Item>
+              </ListGroup>
+            </Card>
+          </Col>
 
-        <Col md={3}>
-          <Card className="shadow-sm border-0 rounded-4 overflow-hidden">
-            <Card.Header className="bg-light border-0 fw-bold py-3 px-4">
-              <h5 className="mb-0 fw-bold">Thông tin giao dịch</h5>
-            </Card.Header>
-            <ListGroup variant="flush">
-              <ListGroup.Item className="p-4">
-                <Row>
-                  <Col>Giá:</Col>
-                  <Col>
-                    <strong className="text-brand-red">{displayPrice?.toLocaleString('vi-VN')} đ</strong>
-                  </Col>
-                </Row>
-              </ListGroup.Item>
-              <ListGroup.Item className="p-4">
-                <Row>
-                  <Col>Trạng thái:</Col>
-                  <Col>
-                    {displayStock > 0 ? (
-                      <span className="text-success fw-bold">
-                        Còn hàng {displayStock <= 5 && `(${displayStock})`}
-                      </span>
-                    ) : (
-                      <span className="text-danger fw-bold">Hết hàng</span>
-                    )}
-                  </Col>
-                </Row>
-              </ListGroup.Item>
-              
-              <ListGroup.Item className="p-4 pt-3 border-0">
-                {displayStock === 0 ? (
-                  <Button variant="secondary" className="w-100 py-3 fs-5 fw-bold rounded-pill shadow-sm" disabled>
-                    Hết hàng
-                  </Button>
-                ) : (
-                  <div className="d-flex flex-column gap-3">
-                    <Button 
-                      variant="danger" 
-                      className="buy-btn w-100 m-0 py-3 rounded-pill fw-bold shadow-sm d-flex align-items-center justify-content-center" 
-                      onClick={handleBuyNow} 
-                    >
-                      MUA NGAY
-                    </Button>
-                    <Button 
-                      variant="light" 
-                      className="w-100 m-0 py-2 rounded-pill fw-bold btn-add-to-cart d-flex align-items-center justify-content-center" 
-                      onClick={handleAddToCart} 
-                      title="Thêm vào giỏ hàng"
-                    >
-                      <FaCartPlus size={18} className="me-2" /> Thêm vào giỏ hàng
-                    </Button>
+          <Col lg={3} md={12}>
+            <Card className="border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+              <Card.Header className="bg-white border-bottom-0 pt-4 px-4">
+                <h5 className="fw-bold mb-0">Thông tin giao dịch</h5>
+              </Card.Header>
+              <ListGroup variant="flush" className="p-2">
+                <ListGroup.Item className="border-0 d-flex justify-content-between align-items-center px-3 py-2">
+                  <span className="text-muted">Giá:</span>
+                  <span className="text-danger fw-bold fs-5">
+                    {/* GIÁ TỰ ĐỘNG THAY ĐỔI THEO SỐ LƯỢNG */}
+                    {( (selectedVariant?.price || 0) * qty ).toLocaleString('vi-VN')} đ
+                  </span>
+                </ListGroup.Item>
+                
+                <ListGroup.Item className="border-0 d-flex justify-content-between align-items-center px-3 py-2">
+                  <span className="text-muted">Trạng thái:</span>
+                  {getStockStatus()}
+                </ListGroup.Item>
+
+                <ListGroup.Item className="border-0 px-3 py-3 border-top border-light">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <span className="text-muted">Số lượng:</span>
+                    <div className="d-flex align-items-center gap-2">
+                      <Button 
+                        variant="light" 
+                        size="sm" 
+                        className="rounded-circle border"
+                        onClick={() => setQty(Math.max(1, qty - 1))}
+                        disabled={qty <= 1}
+                      >
+                        <FaMinus size={10} />
+                      </Button>
+                      <span className="fw-bold px-2">{qty}</span>
+                      <Button 
+                        variant="light" 
+                        size="sm" 
+                        className="rounded-circle border"
+                        onClick={() => setQty(Math.min(selectedVariant?.countInStock || 1, qty + 1))}
+                        disabled={qty >= (selectedVariant?.countInStock || 1)}
+                      >
+                        <FaPlus size={10} />
+                      </Button>
+                    </div>
                   </div>
-                )}
-              </ListGroup.Item>
-            </ListGroup>
-          </Card>
-        </Col>
-      </Row>
-      )}
-    </>
+                </ListGroup.Item>
+
+                <ListGroup.Item className="border-0 px-3 py-3">
+                  <Button 
+                    variant="danger" 
+                    className="w-100 py-3 rounded-pill fw-bold mb-3 shadow-sm border-0"
+                    style={{ backgroundColor: '#d70018' }}
+                    disabled={!selectedVariant || selectedVariant.countInStock <= 0}
+                    onClick={handleBuyNow}
+                  >
+                    MUA NGAY
+                  </Button>
+                  <Button 
+                    variant="outline-danger" 
+                    className="w-100 py-3 rounded-pill fw-bold d-flex align-items-center justify-content-center gap-2 border-2"
+                    disabled={!selectedVariant || selectedVariant.countInStock <= 0}
+                    onClick={handleAddToCart}
+                  >
+                    <FaCartPlus /> Thêm vào giỏ hàng
+                  </Button>
+                </ListGroup.Item>
+              </ListGroup>
+            </Card>
+          </Col>
+        </Row>
+      </div>
+    </div>
   );
 };
 

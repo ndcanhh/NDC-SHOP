@@ -1,22 +1,40 @@
 const mongoose = require('mongoose');
 
 const productSchema = mongoose.Schema({
-    name: { 
-        type: String, 
-        required: true 
-    },
-    image: { 
-        type: String, 
-        required: true 
-    },
-    brand: { 
-        type: String, 
+    name: {
+        type: String,
         required: true
     },
-    price: { 
-        type: Number, 
-        required: true, 
-        default: 0 
+    price: {
+        type: Number,
+        required: true,
+        default: 0
+    },
+    image: {
+        type: String,
+        required: true
+    },
+    brand: {
+        type: String,
+        required: true
+    },
+    category: {
+        type: String,
+        required: true,
+        default: 'Smartphone'
+    },
+    countInStock: {
+        type: Number,
+        required: true,
+        default: 0
+    },
+    numReviews: {
+        type: Number,
+        default: 0
+    },
+    rating: {
+        type: Number,
+        default: 0
     },
 
     isHidden: {
@@ -31,16 +49,18 @@ const productSchema = mongoose.Schema({
         type: [String],
         default: []
     },
-    colorVariants: [{
+    
+    // MÔ HÌNH BIẾN THỂ KẾT HỢP
+    variants: [{
         color: { type: String, required: true },
-        colorCode: { type: String, default: '#000' },
-        image: { type: String, required: true }
-    }],
-    storageVariants: [{
-        label: { type: String, required: true },
+        colorCode: { type: String, default: '#000000' },
+        image: { type: String, required: true },
+        ram: { type: String, required: true },
+        rom: { type: String, required: true },
         price: { type: Number, required: true },
         countInStock: { type: Number, default: 0 }
     }],
+
     specs: {
         ram: { type: String },
         rom: { type: String },

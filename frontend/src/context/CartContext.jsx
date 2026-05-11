@@ -28,26 +28,36 @@ export const CartProvider = ({ children }) => {
   // Hàm tạo khóa duy nhất cho mỗi item trong giỏ (phân biệt theo biến thể)
   const getCartKey = (item) => `${item._id}_${item.color || ''}_${item.storageLabel || ''}`;
 
-  const addToCart = (product) => {
+  const addToCart = (product, qty = 1) => {
     const newKey = getCartKey(product);
     const existItem = cartItems.find((x) => getCartKey(x) === newKey);
 
     if (existItem) {
-      // Nếu đã có cùng biến thể → tăng qty lên 1 nhưng không vượt quá tồn kho
-      if (existItem.qty >= product.countInStock) {
+      // Nếu đã có cùng biến thể → cộng thêm số lượng mới nhưng không vượt quá tồn kho
+      const updatedQty = existItem.qty + qty;
+      if (updatedQty > product.countInStock) {
+        setCartItems(
+          cartItems.map((x) =>
+            getCartKey(x) === newKey
+              ? { ...x, qty: product.countInStock }
+              : x
+          )
+        );
         return false;
       }
       setCartItems(
         cartItems.map((x) =>
           getCartKey(x) === newKey
-            ? { ...x, qty: Math.min(x.countInStock, x.qty + 1) }
+            ? { ...x, qty: updatedQty }
             : x
         )
       );
       return true;
     } else {
       if (product.countInStock > 0) {
-        setCartItems([...cartItems, { ...product, qty: 1 }]);
+        // Thêm mới với số lượng qty đã chọn
+        const initialQty = Math.min(qty, product.countInStock);
+        setCartItems([...cartItems, { ...product, qty: initialQty }]);
         return true;
       }
       return false;
