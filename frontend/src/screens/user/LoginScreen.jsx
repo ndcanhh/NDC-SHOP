@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Form, Button, Row, Col, Card } from 'react-bootstrap';
 import { AuthContext } from '../../context/authContextValue';
 
@@ -9,6 +9,10 @@ const LoginScreen = () => {
   const [error, setError] = useState('');
 
   const navigate = useNavigate();
+  const { search } = useLocation();
+  const sp = new URLSearchParams(search);
+  const redirect = sp.get('redirect') || '/';
+
   // Lấy hàm Đăng nhập và kiểm tra xem có ai đang đăng nhập không
   const { login, userInfo } = useContext(AuthContext);
 
@@ -18,10 +22,10 @@ const LoginScreen = () => {
       if (userInfo.isAdmin) {
         navigate('/admin/dashboard');
       } else {
-        navigate('/');
+        navigate(redirect);
       }
     }
-  }, [userInfo, navigate]);
+  }, [userInfo, navigate, redirect]);
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -84,7 +88,7 @@ const LoginScreen = () => {
           <Row className="py-3">
             <Col className="text-center">
               Khách hàng mới?{' '}
-              <Link to="/register" className="text-brand-red fw-bold text-decoration-none">
+              <Link to={redirect !== '/' ? `/register?redirect=${redirect}` : '/register'} className="text-brand-red fw-bold text-decoration-none">
                 Đăng ký ngay
               </Link>
             </Col>

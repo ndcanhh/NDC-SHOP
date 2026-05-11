@@ -18,7 +18,7 @@ const shuffleArray = (arr) => {
 // Số sản phẩm mỗi hàng (5 cột xl) x 2 hàng = 10 sản phẩm
 const ITEMS_PER_SECTION = 10;
 
-// Component tái sử dụng cho mỗi Section (Khai báo bên ngoài để tránh re-create mỗi lần render)
+// Component tái sử dụng cho mỗi Section
 const ProductSection = ({ title, icon, products: sectionProducts, linkTo, accentColor }) => (
   <div className="mb-5">
     <div className="mb-3">
@@ -86,7 +86,7 @@ const HomeScreen = () => {
   return (
     <>
       {/* Banner Khuyến Mãi */}
-      <div style={{ width: '75%', margin: '0 auto' }}>
+      <div style={{ width: '85%', margin: '0 auto' }}>
         <Carousel className="mb-4 shadow-sm promo-carousel rounded-4 overflow-hidden border-0">
           <Carousel.Item>
             <img

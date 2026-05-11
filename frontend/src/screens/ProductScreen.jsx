@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Row, Col, Image, ListGroup, Card, Button, Spinner, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import { CartContext } from '../context/cartContextDef';
+import { AuthContext } from '../context/authContextValue';
 import { FaCartPlus, FaMinus, FaPlus } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 
@@ -18,6 +19,7 @@ const ProductScreen = () => {
   const [selectedColor, setSelectedColor] = useState(null);
 
   const { addToCart } = useContext(CartContext);
+  const { userInfo } = useContext(AuthContext);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -47,6 +49,11 @@ const ProductScreen = () => {
     : [];
 
   const handleAddToCart = () => {
+    if (!userInfo) {
+        toast.info('Vui lòng đăng nhập để thực hiện chức năng này!');
+        navigate(`/login?redirect=/product/${productId}`);
+        return;
+    }
     if (!selectedVariant) {
         toast.error('Vui lòng chọn phiên bản!');
         return;
@@ -63,6 +70,11 @@ const ProductScreen = () => {
   };
 
   const handleBuyNow = () => {
+    if (!userInfo) {
+        toast.info('Vui lòng đăng nhập để mua hàng!');
+        navigate(`/login?redirect=/product/${productId}`);
+        return;
+    }
     handleAddToCart();
     navigate('/cart');
   };

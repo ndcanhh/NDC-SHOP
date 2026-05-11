@@ -13,6 +13,7 @@ const AddressBook = () => {
 
   // Dữ liệu API Hành chính
   const [provincesData, setProvincesData] = useState([]);
+  const [wardsData, setWardsData] = useState([]);
   
   // Dữ liệu Form
   const [showModal, setShowModal] = useState(false);
@@ -26,8 +27,6 @@ const AddressBook = () => {
   // States chọn địa chỉ
   const [selectedProvinceCode, setSelectedProvinceCode] = useState('');
   const [selectedProvinceName, setSelectedProvinceName] = useState('');
-  const [selectedDistrictCode, setSelectedDistrictCode] = useState('');
-  const [selectedDistrictName, setSelectedDistrictName] = useState('');
   const [selectedWardCode, setSelectedWardCode] = useState('');
   const [selectedWardName, setSelectedWardName] = useState('');
 
@@ -47,7 +46,7 @@ const AddressBook = () => {
 
   const fetchProvinces = useCallback(async () => {
     try {
-      const { data } = await axios.get('https://provinces.open-api.vn/api/?depth=3');
+      const { data } = await axios.get('/api/addresses/provinces');
       setProvincesData(data);
     } catch (err) {
       console.error("Không thể lấy dữ liệu tỉnh thành", err);
@@ -58,6 +57,22 @@ const AddressBook = () => {
     fetchAddresses();
     fetchProvinces();
   }, [fetchAddresses, fetchProvinces]);
+
+  useEffect(() => {
+    const fetchWards = async () => {
+      if (!selectedProvinceCode) {
+        setWardsData([]);
+        return;
+      }
+      try {
+        const { data } = await axios.get(`/api/addresses/wards/${selectedProvinceCode}`);
+        setWardsData(data);
+      } catch (err) {
+        console.error("Lỗi lấy phường xã", err);
+      }
+    };
+    fetchWards();
+  }, [selectedProvinceCode]);
 
   const handleOpenModal = (addr = null) => {
     if (addr) {
@@ -75,8 +90,6 @@ const AddressBook = () => {
       }
 
       setHouseNumber(addr.address);
-      setSelectedDistrictCode('');
-      setSelectedDistrictName('');
       setSelectedWardCode('');
       setSelectedWardName('');
       
@@ -88,8 +101,6 @@ const AddressBook = () => {
       setHouseNumber('');
       setSelectedProvinceCode('');
       setSelectedProvinceName('');
-      setSelectedDistrictCode('');
-      setSelectedDistrictName('');
       setSelectedWardCode('');
       setSelectedWardName('');
       setIsDefault(addresses.length === 0);
@@ -123,8 +134,8 @@ const AddressBook = () => {
       return;
     }
 
-    if (!selectedProvinceCode || !selectedDistrictCode || !selectedWardCode) {
-      toast.warn("Vui lòng chọn đầy đủ Tỉnh/Thành phố, Quận/Huyện, Phường/Xã!");
+    if (!selectedProvinceCode || !selectedWardCode) {
+      toast.warn("Vui lòng chọn đầy đủ Tỉnh/Thành phố và Phường/Xã!");
       return;
     }
 
@@ -132,11 +143,11 @@ const AddressBook = () => {
     try {
       const config = { headers: { Authorization: `Bearer ${userInfo.token}`, 'Content-Type': 'application/json' } };
       
-      // Gộp data đúng cấu trúc để không ảnh hưởng CSDL backend
+      // Gộp data đúng cấu trúc 2 cấp mới
       const cityText = selectedProvinceName;
       let addressText = houseNumber;
       if (!houseNumber.includes(selectedWardName)) {
-        addressText = `${houseNumber}, ${selectedWardName}, ${selectedDistrictName}`;
+        addressText = `${houseNumber}, ${selectedWardName}`;
       }
 
       const payload = { 
@@ -189,9 +200,7 @@ const AddressBook = () => {
     }
   };
 
-  // Tính toán mảng data cho Select
-  const currentDistricts = provincesData.find(p => p.code === Number(selectedProvinceCode))?.districts || [];
-  const currentWards = currentDistricts.find(d => d.code === Number(selectedDistrictCode))?.wards || [];
+  // Xóa các mảng tính toán cũ
 
   return (
     <div className="address-book">
@@ -278,7 +287,7 @@ const AddressBook = () => {
             </Row>
 
             <Row className="g-3">
-              <Col md={4}>
+              <Col md={6}>
                 <Form.Group className="mb-3">
                   <Form.Label className="fw-semibold text-muted small text-uppercase">Tỉnh / Thành phố</Form.Label>
                   <Form.Select 
@@ -287,8 +296,6 @@ const AddressBook = () => {
                       setSelectedProvinceCode(e.target.value);
                       setSelectedProvinceName(e.target.options[e.target.selectedIndex].text);
                       // Clear con
-                      setSelectedDistrictCode('');
-                      setSelectedDistrictName('');
                       setSelectedWardCode('');
                       setSelectedWardName('');
                     }}
@@ -302,32 +309,9 @@ const AddressBook = () => {
                   </Form.Select>
                 </Form.Group>
               </Col>
-              <Col md={4}>
+              <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label className="fw-semibold text-muted small text-uppercase">Quận / Huyện</Form.Label>
-                  <Form.Select 
-                    value={selectedDistrictCode}
-                    onChange={(e) => {
-                      setSelectedDistrictCode(e.target.value);
-                      setSelectedDistrictName(e.target.options[e.target.selectedIndex].text);
-                      // Clear con
-                      setSelectedWardCode('');
-                      setSelectedWardName('');
-                    }}
-                    required
-                    disabled={!selectedProvinceCode}
-                    className="border-0 bg-light rounded-3 px-3 py-2"
-                  >
-                    <option value="">Chọn Quận/Huyện</option>
-                    {currentDistricts.map(d => (
-                      <option key={d.code} value={d.code}>{d.name}</option>
-                    ))}
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-              <Col md={4}>
-                <Form.Group className="mb-3">
-                  <Form.Label className="fw-semibold text-muted small text-uppercase">Phường / Xã</Form.Label>
+                  <Form.Label className="fw-semibold text-muted small text-uppercase">Phường / Xã / Thị trấn</Form.Label>
                   <Form.Select 
                     value={selectedWardCode}
                     onChange={(e) => {
@@ -335,11 +319,11 @@ const AddressBook = () => {
                       setSelectedWardName(e.target.options[e.target.selectedIndex].text);
                     }}
                     required
-                    disabled={!selectedDistrictCode}
+                    disabled={!selectedProvinceCode}
                     className="border-0 bg-light rounded-3 px-3 py-2"
                   >
-                    <option value="">Chọn Phường/Xã</option>
-                    {currentWards.map(w => (
+                    <option value="">Chọn Phường/Xã/Thị trấn</option>
+                    {wardsData.map(w => (
                       <option key={w.code} value={w.code}>{w.name}</option>
                     ))}
                   </Form.Select>

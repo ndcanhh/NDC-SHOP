@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Form, Button, Row, Col, Card } from 'react-bootstrap';
 import { AuthContext } from '../../context/authContextValue';
 
@@ -12,13 +12,17 @@ const RegisterScreen = () => {
   const [error, setError] = useState('');
 
   const navigate = useNavigate();
+  const { search } = useLocation();
+  const sp = new URLSearchParams(search);
+  const redirect = sp.get('redirect') || '/';
+
   const { register, userInfo } = useContext(AuthContext);
 
   useEffect(() => {
     if (userInfo) {
-      navigate('/');
+      navigate(redirect);
     }
-  }, [userInfo, navigate]);
+  }, [userInfo, navigate, redirect]);
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -115,7 +119,7 @@ const RegisterScreen = () => {
           <Row className="py-3">
             <Col className="text-center">
               Đã có tài khoản?{' '}
-              <Link to="/login" className="text-brand-red fw-bold text-decoration-none">
+              <Link to={redirect !== '/' ? `/login?redirect=${redirect}` : '/login'} className="text-brand-red fw-bold text-decoration-none">
                 Đăng nhập
               </Link>
             </Col>
