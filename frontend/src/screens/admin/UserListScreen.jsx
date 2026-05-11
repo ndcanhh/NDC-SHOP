@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Table, Button, Spinner, Alert } from 'react-bootstrap';
+import { Table, Button, Spinner, Alert, Badge, Card, Row, Col } from 'react-bootstrap';
 import axios from 'axios';
 import { AuthContext } from '../../context/authContextValue';
 import { toast } from 'react-toastify';
+import { FaTrash, FaUserShield, FaUser } from 'react-icons/fa';
 
 const UserListScreen = () => {
   const { userInfo } = useContext(AuthContext);
@@ -41,53 +42,74 @@ const UserListScreen = () => {
   };
 
   return (
-    <>
-      <h2 className="mb-4">Danh sách Khách hàng</h2>
+    <div className="admin-user-list">
+      <Row className="align-items-center mb-4">
+        <Col>
+          <h3 className="fw-bold mb-0">Danh sách khách hàng</h3>
+        </Col>
+      </Row>
+
       {loading ? (
-        <Spinner animation="border" />
+        <div className="text-center p-5">
+          <Spinner animation="border" variant="primary" />
+        </div>
       ) : error ? (
-        <Alert variant="danger">{error}</Alert>
+        <Alert variant="danger" className="border-0 shadow-sm">{error}</Alert>
       ) : (
-        <Table striped bordered hover responsive className="table-sm text-center align-middle">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Tên</th>
-              <th>Email</th>
-              <th>Admin</th>
-              <th>Hành động</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user) => (
-              <tr key={user._id}>
-                <td>{user._id}</td>
-                <td>{user.name}</td>
-                <td><a href={`mailto:${user.email}`}>{user.email}</a></td>
-                <td>
-                  {user.isAdmin ? (
-                    <span className="text-success fw-bold">Có</span>
-                  ) : (
-                    <span className="text-danger">Không</span>
-                  )}
-                </td>
-                <td>
-                  {!user.isAdmin && (
-                    <Button
-                      variant="danger"
-                      className="btn-sm"
-                      onClick={() => deleteHandler(user._id)}
-                    >
-                      Xóa
-                    </Button>
-                  )}
-                </td>
+        <Card className="border-0 shadow-sm rounded-4 overflow-hidden">
+          <Table hover responsive className="mb-0 align-middle">
+            <thead className="bg-light">
+              <tr className="text-muted small text-uppercase fw-bold">
+                <th className="ps-4 py-3">Mã khách hàng</th>
+                <th className="py-3">Thông tin khách hàng</th>
+                <th className="py-3">Email</th>
+                <th className="py-3 text-center">Vai trò</th>
+                <th className="py-3 text-end pe-4">Hành động</th>
               </tr>
-            ))}
-          </tbody>
-        </Table>
+            </thead>
+            <tbody>
+              {users.map((user) => (
+                <tr key={user._id}>
+                  <td className="ps-4">
+                    <span className="fw-bold text-dark">#{user._id.substring(user._id.length - 8).toUpperCase()}</span>
+                  </td>
+                  <td>
+                    <div className="d-flex align-items-center gap-3">
+                      <div className="bg-secondary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center text-secondary" style={{ width: '40px', height: '40px' }}>
+                        {user.isAdmin ? <FaUserShield size={18} /> : <FaUser size={18} />}
+                      </div>
+                      <span className="fw-medium text-dark">{user.name}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <a href={`mailto:${user.email}`} className="text-decoration-none text-muted">{user.email}</a>
+                  </td>
+                  <td className="text-center">
+                    {user.isAdmin ? (
+                      <Badge bg="danger" className="px-3 rounded-pill">Admin</Badge>
+                    ) : (
+                      <Badge bg="light" text="dark" className="border px-3 rounded-pill text-secondary">Khách hàng</Badge>
+                    )}
+                  </td>
+                  <td className="text-end pe-4">
+                    {!user.isAdmin && (
+                      <Button
+                        variant="outline-danger"
+                        className="btn-sm border-0 bg-light rounded-3"
+                        onClick={() => deleteHandler(user._id)}
+                        title="Xóa khách hàng"
+                      >
+                        <FaTrash />
+                      </Button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </Card>
       )}
-    </>
+    </div>
   );
 };
 

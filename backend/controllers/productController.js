@@ -1,18 +1,13 @@
-const Product = require('../models/productModel'); // Import quyển sổ (Model) chứa Sản phẩm
+const Product = require('../models/productModel');
 const cloudinary = require('../config/cloudinary');
 
-// 1. Hàm: Lấy TẤT CẢ điện thoại
-// Mục đích: Phục vụ cho Trang Chủ (Hiển thị tất cả sản phẩm)
-// Đường dẫn (Route): GET /api/products
+// Lấy TẤT CẢ điện thoại
+// GET /api/products
 const getProducts = async (req, res) => {
     try {
-        // Lấy TẤT CẢ dữ liệu nhưng bỏ qua các sản phẩm đang bị ẩn
         const products = await Product.find({ isHidden: { $ne: true } });
-        
-        // Gói dữ liệu lại bằng JSON và gửi trả về cho Frontend (React)
         res.json(products);
     } catch (error) {
-        // Nếu có lỗi, trả về mã 500 (Lỗi máy chủ)
         res.status(500).json({ message: 'Lỗi khi lấy danh sách sản phẩm', error: error.message });
     }
 };
@@ -27,43 +22,32 @@ const getAdminProducts = async (req, res) => {
     }
 };
 
-// 2. Hàm: Lấy CHI TIẾT MỘT cái điện thoại
-// Mục đích: Phục vụ cho Trang Chi Tiết Sản Phẩm (Khi khách click vào 1 hình điện thoại)
-// Đường dẫn (Route): GET /api/products/:id (Trong đó :id là mã của điện thoại đó, ví dụ /api/products/123)
+// Lấy CHI TIẾT MỘT cái điện thoại
+// GET /api/products/:id
 const getProductById = async (req, res) => {
     try {
-        // Chờ anh bồi bàn chạy vào kho, tìm đúng 1 sản phẩm có mã ID (req.params.id) khớp với mã khách gửi lên
         const product = await Product.findById(req.params.id);
 
         if (product) {
-            // Nếu tìm thấy, gửi dữ liệu đó về cho khách
             res.json(product);
         } else {
-            // Nếu ông khách gõ bậy mã ID hoặc mã đó đã bị xoá, báo lỗi 404 (Không tìm thấy)
             res.status(404).json({ message: 'Không tìm thấy sản phẩm này!' });
         }
     } catch (error) {
-        // Xử lý lỗi trong trường hợp định dạng ID của MongoDB bị sai (không đủ 24 ký tự)
         res.status(500).json({ message: 'Lỗi khi lấy thông tin sản phẩm', error: error.message });
     }
 };
 
-// 3. Hàm: Tìm kiếm sản phẩm theo từ khóa
-// Mục đích: Khi khách gõ trên thanh tìm kiếm, gợi ý sản phẩm phù hợp
-// Đường dẫn (Route): GET /api/products/search?keyword=iphone
+// Tìm kiếm sản phẩm theo từ khóa
+// GET /api/products/search?keyword=iphone
 const searchProducts = async (req, res) => {
     try {
-        // Lấy từ khóa từ URL query: ?keyword=iphone
         const keyword = req.query.keyword;
 
         if (!keyword) {
-            return res.json([]); // Không có từ khóa → trả mảng rỗng
+            return res.json([]);
         }
 
-        // Dùng RegExp (biểu thức chính quy) để tìm kiếm "gần đúng"
-        // 'i' = không phân biệt chữ HOA/thường (iPhone = iphone = IPHONE)
-        // Ví dụ: keyword = "iphone" → tìm tất cả sản phẩm có chữ "iphone" trong tên
-        // limit có thể truyền qua query: ?limit=6 (cho dropdown gợi ý), mặc định 50
         const limit = parseInt(req.query.limit) || 50;
         const products = await Product.find({
             name: { $regex: keyword, $options: 'i' },
@@ -76,9 +60,9 @@ const searchProducts = async (req, res) => {
     }
 };
 
-// 4. Hàm: Tạo sản phẩm mới (Cho Admin)
-// @route   POST /api/products
-// @access  Private/Admin
+// Tạo sản phẩm mới
+// POST /api/products
+// access: Private/Admin
 const createProduct = async (req, res) => {
     try {
         const { name, price, description, image, brand, discount, specs, isHidden, tags, colorVariants, storageVariants } = req.body;
@@ -105,9 +89,9 @@ const createProduct = async (req, res) => {
     }
 };
 
-// 5. Hàm: Cập nhật thông tin sản phẩm (Cho Admin)
-// @route   PUT /api/products/:id
-// @access  Private/Admin
+// Cập nhật thông tin sản phẩm
+// PUT /api/products/:id
+// access: Private/Admin
 const updateProduct = async (req, res) => {
     try {
         const { name, price, description, image, brand, discount, specs, isHidden, tags, colorVariants, storageVariants } = req.body;
@@ -137,9 +121,9 @@ const updateProduct = async (req, res) => {
     }
 };
 
-// 6. Hàm: Xóa sản phẩm (Cho Admin)
-// @route   DELETE /api/products/:id
-// @access  Private/Admin
+// Xóa sản phẩm
+// DELETE /api/products/:id
+// access: Private/Admin
 const deleteProduct = async (req, res) => {
     try {
         const product = await Product.findById(req.params.id);

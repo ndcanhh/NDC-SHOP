@@ -7,32 +7,32 @@ const newsSchema = mongoose.Schema({
     },
     category: {
         type: String,
-        required: true, // VD: Apple, Samsung, Thủ thuật
+        required: true,
     },
     image: {
         type: String,
-        default: '', // Ảnh bìa bài viết
+        default: '',
     },
     description: {
         type: String,
-        required: true, // Mô tả ngắn
+        required: true,
     },
     content: {
         type: String,
-        required: true, // Nội dung chi tiết (HTML hoặc Markdown)
+        required: true,
     },
     author: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true, // Bài viết phải do Admin tạo
+        required: true,
     },
     tag: {
         type: String,
-        default: 'Mới', // VD: Mới, Hot, Đánh giá
+        default: 'Mới',
     },
     tagColor: {
         type: String,
-        default: 'danger', // primary, success, danger, warning...
+        default: 'danger',
     }
 }, {
     timestamps: true,

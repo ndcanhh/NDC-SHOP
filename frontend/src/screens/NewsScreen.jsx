@@ -95,7 +95,7 @@ const NewsScreen = () => {
         <Row className="g-3">
           {newsList.map((news) => (
             <Col key={news._id || news.id} md={6} lg={4}>
-              <Card className="border-0 shadow-sm h-100 news-card" style={{ cursor: 'pointer' }}>
+              <Card className="border-0 shadow-sm h-100 news-card rounded-4 bg-white overflow-hidden" style={{ cursor: 'pointer' }}>
                 {/* Header màu gradient thay cho ảnh */}
                 <div className="news-card-header" style={{
                   background: news.image ? `url(${optimizeCloudinaryUrl(news.image, 400, 200)}) center/cover` : `linear-gradient(135deg, #d70018, #ff6b35)`,
@@ -105,7 +105,7 @@ const NewsScreen = () => {
 
                 <Card.Body className="p-3 d-flex flex-column">
                   <div className="d-flex align-items-center gap-2 mb-2">
-                    <Badge bg={news.tagColor} className="px-2 py-1" style={{ fontSize: '0.7rem' }}>
+                    <Badge bg={news.tagColor} className="px-3 py-1 rounded-pill shadow-sm" style={{ fontSize: '0.7rem' }}>
                       {news.tag}
                     </Badge>
                     <small className="text-muted d-flex align-items-center gap-1">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { Card, Button, Form, Modal, Spinner, Badge, Alert, Row, Col } from 'react-bootstrap';
 import { FaPlus, FaEdit, FaTrash, FaMapMarkerAlt, FaCheck } from 'react-icons/fa';
 import axios from 'axios';
@@ -31,13 +31,7 @@ const AddressBook = () => {
   const [selectedWardCode, setSelectedWardCode] = useState('');
   const [selectedWardName, setSelectedWardName] = useState('');
 
-  useEffect(() => {
-    fetchAddresses();
-    fetchProvinces();
-    // eslint-disable-next-line
-  }, [userInfo]);
-
-  const fetchAddresses = async () => {
+  const fetchAddresses = useCallback(async () => {
     try {
       setLoading(true);
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
@@ -49,16 +43,21 @@ const AddressBook = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userInfo.token]);
 
-  const fetchProvinces = async () => {
+  const fetchProvinces = useCallback(async () => {
     try {
       const { data } = await axios.get('https://provinces.open-api.vn/api/?depth=3');
       setProvincesData(data);
     } catch (err) {
       console.error("Không thể lấy dữ liệu tỉnh thành", err);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchAddresses();
+    fetchProvinces();
+  }, [fetchAddresses, fetchProvinces]);
 
   const handleOpenModal = (addr = null) => {
     if (addr) {
@@ -66,8 +65,6 @@ const AddressBook = () => {
       setRecipientName(addr.recipientName);
       setPhone(addr.phone);
       
-      // Fallback: Vì địa chỉ cũ là text tự do (VD: address: "nhà 1, xã A, huyện B", city: "Hà Nội")
-      // Nếu map không trúng, buộc user phải chọn lại xã/huyện
       const foundProv = provincesData.find(p => p.name === addr.city || addr.city.includes(p.name));
       if (foundProv) {
         setSelectedProvinceCode(foundProv.code);
@@ -106,6 +103,26 @@ const AddressBook = () => {
 
   const handleSaveAddress = async (e) => {
     e.preventDefault();
+
+    // Regex chuẩn Unicode cho tiếng Việt (Hỗ trợ tất cả các loại dấu)
+    const nameRegex = /^[\p{L}\s]+$/u;
+    const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/;
+
+    if (!recipientName.trim() || !nameRegex.test(recipientName)) {
+      toast.warn("Tên người nhận không hợp lệ (Không chứa số hoặc ký tự đặc biệt)!");
+      return;
+    }
+
+    if (!phoneRegex.test(phone)) {
+      toast.warn("Số điện thoại không hợp lệ (phải có 10 số, bắt đầu bằng 03, 05, 07, 08, 09)!");
+      return;
+    }
+
+    if (!houseNumber.trim()) {
+      toast.warn("Vui lòng nhập địa chỉ cụ thể (số nhà, tên đường)!");
+      return;
+    }
+
     if (!selectedProvinceCode || !selectedDistrictCode || !selectedWardCode) {
       toast.warn("Vui lòng chọn đầy đủ Tỉnh/Thành phố, Quận/Huyện, Phường/Xã!");
       return;
@@ -117,9 +134,8 @@ const AddressBook = () => {
       
       // Gộp data đúng cấu trúc để không ảnh hưởng CSDL backend
       const cityText = selectedProvinceName;
-      // Dấu phẩy + space để format đẹp
       let addressText = houseNumber;
-      if (!houseNumber.includes(selectedWardName)) { // Tránh lặp lại nếu lúc sửa họ truyền cả string
+      if (!houseNumber.includes(selectedWardName)) {
         addressText = `${houseNumber}, ${selectedWardName}, ${selectedDistrictName}`;
       }
 
@@ -181,12 +197,12 @@ const AddressBook = () => {
     <div className="address-book">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h5 className="fw-bold mb-0">Địa chỉ của tôi</h5>
-        <Button variant="danger" size="sm" onClick={() => handleOpenModal()} className="d-flex align-items-center gap-2">
+        <Button variant="danger" size="sm" onClick={() => handleOpenModal()} className="d-flex align-items-center gap-2 rounded-pill px-4 py-2 shadow-sm fw-bold">
           <FaPlus /> Thêm địa chỉ mới
         </Button>
       </div>
 
-      {error && <Alert variant="danger">{error}</Alert>}
+      {error && <Alert variant="danger" className="rounded-3 border-0">{error}</Alert>}
 
       {loading ? (
         <div className="text-center py-5"><Spinner animation="border" variant="danger" /></div>
@@ -198,15 +214,16 @@ const AddressBook = () => {
       ) : (
         <div className="address-list">
           {addresses.map((addr) => (
-            <Card key={addr._id} className={`mb-3 border-1 ${addr.isDefault ? 'border-danger bg-light' : 'border-light-subtle'}`}>
-              <Card.Body className="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+            <Card key={addr._id} className={`mb-4 border-0 shadow-sm rounded-4 overflow-hidden ${addr.isDefault ? 'bg-light' : ''}`}>
+              {addr.isDefault && <div style={{ height: '4px', background: 'linear-gradient(135deg, #d70018, #ff4d4f)' }}></div>}
+              <Card.Body className="p-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center">
                 <div className="flex-grow-1">
                   <div className="d-flex align-items-center gap-2 mb-2">
                     <span className="fw-bold fs-5">{addr.recipientName}</span>
                     <span className="text-muted">|</span>
                     <span className="text-muted fw-semibold">{addr.phone}</span>
                     {addr.isDefault && (
-                      <Badge bg="danger" className="ms-2">Mặc định</Badge>
+                      <Badge bg="danger" className="ms-2 rounded-pill px-3 py-2 shadow-sm">Mặc định</Badge>
                     )}
                   </div>
                   <div className="text-secondary small d-flex flex-column gap-1">
@@ -216,19 +233,19 @@ const AddressBook = () => {
                 </div>
                 
                 <div className="d-flex flex-row flex-md-column align-items-end justify-content-center gap-2 mt-3 mt-md-0">
-                  <div>
-                    <Button variant="link" className="text-primary text-decoration-none p-0 me-3" onClick={() => handleOpenModal(addr)}>
-                      <FaEdit className="me-1" /> Sửa
+                  <div className="d-flex gap-2 mb-1">
+                    <Button variant="light" className="rounded-circle shadow-sm d-flex align-items-center justify-content-center border" style={{ width: '38px', height: '38px' }} onClick={() => handleOpenModal(addr)} title="Sửa địa chỉ">
+                      <FaEdit className="text-primary" />
                     </Button>
                     {!addr.isDefault && (
-                      <Button variant="link" className="text-danger text-decoration-none p-0" onClick={() => handleDelete(addr._id)}>
-                        <FaTrash className="me-1" /> Xóa
+                      <Button variant="light" className="rounded-circle shadow-sm d-flex align-items-center justify-content-center border" style={{ width: '38px', height: '38px' }} onClick={() => handleDelete(addr._id)} title="Xóa địa chỉ">
+                        <FaTrash className="text-danger" />
                       </Button>
                     )}
                   </div>
                   {!addr.isDefault && (
-                    <Button variant="outline-danger" size="sm" className="rounded-pill px-3" onClick={() => handleSetDefault(addr._id)} disabled={actionLoading}>
-                      <FaCheck className="me-1" /> Đặt mặc định
+                    <Button variant="outline-danger" size="sm" className="rounded-pill px-3 py-1 fw-bold border-2 shadow-sm" onClick={() => handleSetDefault(addr._id)} disabled={actionLoading}>
+                      Thiết lập mặc định
                     </Button>
                   )}
                 </div>
@@ -239,31 +256,31 @@ const AddressBook = () => {
       )}
 
       {/* Modal Thêm / Sửa Địa Chỉ */}
-      <Modal show={showModal} onHide={handleCloseModal} centered size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>{editId ? 'Sửa địa chỉ' : 'Thêm địa chỉ mới'}</Modal.Title>
+      <Modal show={showModal} onHide={handleCloseModal} centered size="lg" contentClassName="border-0 rounded-4 shadow-lg">
+        <Modal.Header closeButton className="border-bottom-0 pt-4 px-4 pb-0">
+          <Modal.Title className="fw-bold">{editId ? 'Sửa địa chỉ' : 'Thêm địa chỉ mới'}</Modal.Title>
         </Modal.Header>
         <Form onSubmit={handleSaveAddress}>
-          <Modal.Body>
-            <Row>
+          <Modal.Body className="p-4">
+            <Row className="g-3">
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label className="fw-semibold">Tên người nhận</Form.Label>
-                  <Form.Control type="text" value={recipientName} onChange={(e) => setRecipientName(e.target.value)} required />
+                  <Form.Label className="fw-semibold text-muted small text-uppercase">Tên người nhận</Form.Label>
+                  <Form.Control type="text" value={recipientName} onChange={(e) => setRecipientName(e.target.value)} required className="border-0 bg-light rounded-3 px-3 py-2" />
                 </Form.Group>
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label className="fw-semibold">Số điện thoại</Form.Label>
-                  <Form.Control type="text" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+                  <Form.Label className="fw-semibold text-muted small text-uppercase">Số điện thoại</Form.Label>
+                  <Form.Control type="text" value={phone} onChange={(e) => setPhone(e.target.value)} required className="border-0 bg-light rounded-3 px-3 py-2" />
                 </Form.Group>
               </Col>
             </Row>
 
-            <Row>
+            <Row className="g-3">
               <Col md={4}>
                 <Form.Group className="mb-3">
-                  <Form.Label className="fw-semibold">Tỉnh / Thành phố</Form.Label>
+                  <Form.Label className="fw-semibold text-muted small text-uppercase">Tỉnh / Thành phố</Form.Label>
                   <Form.Select 
                     value={selectedProvinceCode}
                     onChange={(e) => {
@@ -276,6 +293,7 @@ const AddressBook = () => {
                       setSelectedWardName('');
                     }}
                     required
+                    className="border-0 bg-light rounded-3 px-3 py-2"
                   >
                     <option value="">Chọn Tỉnh/Thành</option>
                     {provincesData.map(p => (
@@ -286,7 +304,7 @@ const AddressBook = () => {
               </Col>
               <Col md={4}>
                 <Form.Group className="mb-3">
-                  <Form.Label className="fw-semibold">Quận / Huyện</Form.Label>
+                  <Form.Label className="fw-semibold text-muted small text-uppercase">Quận / Huyện</Form.Label>
                   <Form.Select 
                     value={selectedDistrictCode}
                     onChange={(e) => {
@@ -298,6 +316,7 @@ const AddressBook = () => {
                     }}
                     required
                     disabled={!selectedProvinceCode}
+                    className="border-0 bg-light rounded-3 px-3 py-2"
                   >
                     <option value="">Chọn Quận/Huyện</option>
                     {currentDistricts.map(d => (
@@ -308,7 +327,7 @@ const AddressBook = () => {
               </Col>
               <Col md={4}>
                 <Form.Group className="mb-3">
-                  <Form.Label className="fw-semibold">Phường / Xã</Form.Label>
+                  <Form.Label className="fw-semibold text-muted small text-uppercase">Phường / Xã</Form.Label>
                   <Form.Select 
                     value={selectedWardCode}
                     onChange={(e) => {
@@ -317,6 +336,7 @@ const AddressBook = () => {
                     }}
                     required
                     disabled={!selectedDistrictCode}
+                    className="border-0 bg-light rounded-3 px-3 py-2"
                   >
                     <option value="">Chọn Phường/Xã</option>
                     {currentWards.map(w => (
@@ -328,8 +348,8 @@ const AddressBook = () => {
             </Row>
 
             <Form.Group className="mb-3">
-              <Form.Label className="fw-semibold">Địa chỉ cụ thể (Số nhà, Tên đường)</Form.Label>
-              <Form.Control type="text" placeholder="VD: Số nhà 123, đường Nguyễn Văn A" value={houseNumber} onChange={(e) => setHouseNumber(e.target.value)} required />
+              <Form.Label className="fw-semibold text-muted small text-uppercase">Địa chỉ cụ thể (Số nhà, Tên đường)</Form.Label>
+              <Form.Control type="text" placeholder="VD: Số nhà 123, đường Nguyễn Văn A" value={houseNumber} onChange={(e) => setHouseNumber(e.target.value)} required className="border-0 bg-light rounded-3 px-3 py-2" />
               {editId && houseNumber && !selectedWardCode && (
                  <Form.Text className="text-warning">
                    * Địa chỉ cũ: {houseNumber}. Vui lòng phân loại lại bằng các danh sách chọn bên trên và điền Số Nhà chính xác vào đây.
@@ -337,23 +357,23 @@ const AddressBook = () => {
               )}
             </Form.Group>
 
-            {!isDefault && addresses.length > 0 && (
+            {(!editId || !addresses.find(a => a._id === editId)?.isDefault) && addresses.length > 0 && (
               <Form.Check 
                 type="checkbox" 
                 id="defaultCheck" 
                 label="Đặt làm địa chỉ mặc định" 
                 checked={isDefault}
                 onChange={(e) => setIsDefault(e.target.checked)}
-                className="text-muted mt-2"
+                className="text-muted mt-2 fw-semibold"
               />
             )}
-            {isDefault && editId && (
-               <small className="text-danger d-block mt-2">Đây là địa chỉ mặc định của bạn.</small>
+            {editId && addresses.find(a => a._id === editId)?.isDefault && (
+               <small className="text-danger d-block mt-2 fw-semibold">Đây là địa chỉ mặc định của bạn.</small>
             )}
           </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleCloseModal}>Hủy</Button>
-            <Button variant="danger" type="submit" disabled={actionLoading || !provincesData.length}>
+          <Modal.Footer className="border-top-0 px-4 pb-4 pt-0">
+            <Button variant="secondary" onClick={handleCloseModal} className="rounded-pill px-4 fw-bold shadow-sm">Hủy</Button>
+            <Button variant="danger" type="submit" disabled={actionLoading || !provincesData.length} className="rounded-pill px-4 fw-bold shadow-sm">
               {actionLoading ? <Spinner size="sm" animation="border" /> : 'Lưu lại'}
             </Button>
           </Modal.Footer>

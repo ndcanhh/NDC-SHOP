@@ -7,10 +7,9 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-dark text-white pt-4 pb-3 mt-5">
+    <footer className="bg-dark text-white pt-5 pb-4 mt-5 border-top border-4 border-danger">
       <Container>
         <Row className="g-4">
-          {/* Cột 1: Thông tin cửa hàng */}
           <Col md={4}>
             <h5 className="fw-bold mb-3 text-danger">NDC SHOP</h5>
             <p className="text-white-50 small mb-2 d-flex align-items-center gap-2">
@@ -24,7 +23,6 @@ const Footer = () => {
             </p>
           </Col>
 
-          {/* Cột 2: Chính sách */}
           <Col md={4}>
             <h6 className="fw-bold mb-3">Chính sách</h6>
             <ul className="list-unstyled small">
@@ -35,19 +33,17 @@ const Footer = () => {
             </ul>
           </Col>
 
-          {/* Cột 3: Mạng xã hội */}
           <Col md={4}>
             <h6 className="fw-bold mb-3">Kết nối với chúng tôi</h6>
-            <div className="d-flex gap-3 mb-3">
-              <a href="#" className="social-icon" aria-label="Facebook"><FaFacebookF size={18} /></a>
-              <a href="#" className="social-icon" aria-label="YouTube"><FaYoutube size={18} /></a>
-              <a href="#" className="social-icon" aria-label="TikTok"><FaTiktok size={18} /></a>
+            <div className="d-flex gap-2 mb-3">
+              <a href="#" className="btn btn-outline-light rounded-circle d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }} aria-label="Facebook"><FaFacebookF size={18} /></a>
+              <a href="#" className="btn btn-outline-light rounded-circle d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }} aria-label="YouTube"><FaYoutube size={18} /></a>
+              <a href="#" className="btn btn-outline-light rounded-circle d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }} aria-label="TikTok"><FaTiktok size={18} /></a>
             </div>
             <p className="text-white-50 small mb-0">Theo dõi chúng tôi để cập nhật khuyến mãi mới nhất!</p>
           </Col>
         </Row>
 
-        {/* Đường kẻ phân cách + bản quyền */}
         <hr className="border-secondary mt-4 mb-3" />
         <p className="text-center text-white-50 small mb-0">
           NDC Shop &copy; {currentYear} — Chuyên điện thoại chính hãng

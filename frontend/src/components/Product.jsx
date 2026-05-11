@@ -83,7 +83,7 @@ const Product = ({ product }) => {
   const oldPrice = discount > 0 ? Math.round(product.price / (1 - discount / 100)) : product.price;
 
   return (
-    <Card className='my-1 p-2 rounded shadow-sm h-100 product-card position-relative'>
+    <Card className='my-1 p-3 border-0 rounded-4 shadow-sm h-100 product-card position-relative bg-white'>
       {discount > 0 && <div className="discount-badge">Giảm {discount}%</div>}
 
       <Link to={`/product/${product._id}`}>
@@ -103,6 +103,7 @@ const Product = ({ product }) => {
               <Badge 
                 key={idx} 
                 bg={getBadgeVariant(tag)}
+                className="rounded-pill px-3 py-1 shadow-sm"
                 style={getBadgeVariant(tag) === 'purple' ? { backgroundColor: '#6f42c1' } : {}}
               >
                 {tag}
@@ -132,24 +133,24 @@ const Product = ({ product }) => {
             )}
         </div>
 
-        <div className="d-flex gap-2 mt-auto">
+        <div className="d-flex gap-2 mt-auto align-items-center">
           {displayStock === 0 ? (
-            <Button variant="secondary" className="flex-grow-1 m-0" disabled>
+            <Button variant="secondary" className="flex-grow-1 m-0 rounded-pill fw-bold shadow-sm" disabled>
               Hết hàng
             </Button>
           ) : (
             <>
               <Button 
                 variant="danger" 
-                className="buy-btn flex-grow-1 m-0" 
+                className="buy-btn flex-grow-1 m-0 rounded-pill fw-bold shadow-sm" 
                 onClick={handleBuyNow} 
               >
                 MUA NGAY
               </Button>
               <Button 
-                variant="outline-danger" 
-                className="flex-shrink-0" 
-                style={{ width: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px' }}
+                variant="light" 
+                className="flex-shrink-0 rounded-circle shadow-sm border d-flex align-items-center justify-content-center text-danger" 
+                style={{ width: '42px', height: '42px', padding: 0 }}
                 onClick={handleAddToCart} 
                 title="Thêm vào giỏ hàng"
               >

@@ -7,9 +7,9 @@ import { FaArrowLeft, FaStar, FaBolt, FaFire } from 'react-icons/fa';
 
 // Cấu hình tiêu đề & biểu tượng theo từng loại danh mục
 const categoryConfig = {
-  all: { title: 'Tất cả Điện thoại', icon: <FaStar className="text-warning" />, filter: () => true },
-  new: { title: 'Điện thoại Mới', icon: <FaBolt className="text-success" />, filter: (p) => (p.tags || []).some(t => t.toLowerCase().includes('mới')) },
-  hot: { title: 'Điện thoại Hot', icon: <FaFire className="text-danger" />, filter: (p) => (p.tags || []).some(t => t.toLowerCase().includes('hot')) },
+  all: { title: 'TẤT CẢ ĐIỆN THOẠI', filter: () => true },
+  new: { title: 'ĐIỆN THOẠI MỚI', filter: (p) => (p.tags || []).some(t => t.toLowerCase().includes('mới')) },
+  hot: { title: 'ĐIỆN THOẠI HOT', filter: (p) => (p.tags || []).some(t => t.toLowerCase().includes('hot')) },
 };
 
 const ProductCategoryScreen = () => {
@@ -50,12 +50,11 @@ const ProductCategoryScreen = () => {
 
   return (
     <>
-      <Link className="btn btn-light my-3 border shadow-sm d-inline-flex align-items-center gap-2" to="/">
+      <Link className="btn btn-light my-3 border shadow-sm d-inline-flex align-items-center gap-2 rounded-pill px-4" to="/">
         <FaArrowLeft /> Quay lại trang chủ
       </Link>
 
       <h3 className="mb-3 ps-2 border-start border-danger border-4 fw-bold d-flex align-items-center gap-2">
-        {config.icon}
         {config.title}
       </h3>
 
@@ -81,7 +80,7 @@ const ProductCategoryScreen = () => {
           <p className="mt-2 text-muted">Đang tải sản phẩm...</p>
         </div>
       ) : error ? (
-        <Alert variant="danger" className="text-center">{error}</Alert>
+        <Alert variant="danger" className="text-center rounded-4 shadow-sm border-0">{error}</Alert>
       ) : filteredProducts.length === 0 ? (
         <div className="text-center py-5 w-100">
           <h5 className="text-muted">Không tìm thấy sản phẩm nào.</h5>

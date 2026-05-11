@@ -38,13 +38,12 @@ const SearchScreen = () => {
   return (
     <>
       {/* Nút quay lại + tiêu đề */}
-      <Link className="btn btn-light my-3 border shadow-sm d-inline-flex align-items-center gap-2" to="/">
+      <Link className="btn btn-light my-3 border shadow-sm d-inline-flex align-items-center gap-2 rounded-pill px-4" to="/">
         <FaArrowLeft /> Quay lại trang chủ
       </Link>
 
       <h3 className="mb-3 ps-2 border-start border-danger border-4 fw-bold d-flex align-items-center gap-2">
-        <FaSearch className="text-danger" />
-        Kết quả tìm kiếm: "{keyword}"
+        KẾT QUẢ TÌM KIẾM: "{keyword}"
       </h3>
 
       {/* Trạng thái Loading */}
@@ -52,7 +51,7 @@ const SearchScreen = () => {
         <p className="text-center text-muted py-5">🔍 Đang tìm kiếm...</p>
       ) : products.length === 0 ? (
         // Không tìm thấy kết quả
-        <Alert variant="warning" className="text-center py-4">
+        <Alert variant="warning" className="text-center py-4 rounded-4 shadow-sm border-0">
           <h5>Không tìm thấy sản phẩm nào cho "{keyword}"</h5>
           <p className="mb-0">Hãy thử tìm với từ khóa khác, ví dụ: iPhone, Samsung, Xiaomi...</p>
         </Alert>

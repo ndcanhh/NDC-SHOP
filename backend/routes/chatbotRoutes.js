@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { chatWithAI } = require('../controllers/chatbotController');
+const { chatWithAI, getHistory, saveHistory } = require('../controllers/chatbotController');
+const { protect } = require('../middleware/authMiddleware');
 
-// POST /api/chatbot — Gửi tin nhắn cho AI (công khai, không cần đăng nhập)
 router.post('/', chatWithAI);
+router.get('/history', protect, getHistory);
+router.post('/save', protect, saveHistory);
 
 module.exports = router;

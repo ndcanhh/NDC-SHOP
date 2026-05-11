@@ -2,25 +2,20 @@ const asyncHandler = require('express-async-handler');
 const Order = require('../models/orderModel');
 const { VNPay, ignoreLogger, ProductCode, VnpLocale } = require('vnpay');
 
-// ======================================================
 // CẤU HÌNH VNPAY SANDBOX
-// Credentials sandbox từ tài liệu tích hợp VNPay
-// ======================================================
 const getVNPay = () => new VNPay({
     tmnCode: process.env.VNP_TMN_CODE || 'DEMOV210',
     secureSecret: process.env.VNP_HASH_SECRET || 'RAOEXHYVSDDIIENYWSLDIIZTACEODAAA',
     vnpayHost: 'https://sandbox.vnpayment.vn',
-    testMode: true,           // Bật chế độ sandbox
-    hashAlgorithm: 'SHA512',  // Thuật toán hash bắt buộc
-    enableLog: true,          // Log để debug
-    loggerFn: ignoreLogger,   // Dùng logger im lặng (không spam console)
+    testMode: true,
+    hashAlgorithm: 'SHA512',
+    enableLog: true,
+    loggerFn: ignoreLogger,
 });
 
-// ===================================================================
 // @desc    Tạo URL thanh toán VNPay
 // @route   POST /api/payment/vnpay
 // @access  Private
-// ===================================================================
 const createVNPayPayment = asyncHandler(async (req, res) => {
     const { orderId } = req.body;
 
@@ -32,20 +27,20 @@ const createVNPayPayment = asyncHandler(async (req, res) => {
 
     const vnpay = getVNPay();
 
-    // txnRef: chỉ alphanumeric, tối đa 100 ký tự, duy nhất mỗi giao dịch
+    //txnRef: chỉ alphanumeric, tối đa 100 ký tự, duy nhất mỗi giao dịch
     const txnRef = orderId.toString().slice(-8).toUpperCase() + Date.now().toString().slice(-4);
 
     const returnUrl = process.env.VNP_RETURN_URL || 'http://localhost:5173/orders';
 
     const payUrl = vnpay.buildPaymentUrl({
-        vnp_Amount: Math.round(order.totalPrice),   // Package tự nhân 100
+        vnp_Amount: Math.round(order.totalPrice),
         vnp_IpAddr: '127.0.0.1',
         vnp_TxnRef: txnRef,
         vnp_OrderInfo: `Thanh toan don hang NDC SHOP`,
         vnp_OrderType: ProductCode.Other,
         vnp_ReturnUrl: returnUrl,
         vnp_Locale: VnpLocale.VN,
-        vnp_BankCode: 'NCB', // Nhảy thẳng qua bước chọn ngân hàng
+        vnp_BankCode: 'NCB',
     });
 
     console.log('[VNPay] txnRef:', txnRef, '| amount:', order.totalPrice);
@@ -58,11 +53,9 @@ const createVNPayPayment = asyncHandler(async (req, res) => {
     res.json({ payUrl, txnRef, orderId });
 });
 
-// ===================================================================
 // @desc    Xác thực kết quả trả về từ VNPay
 // @route   POST /api/payment/vnpay-verify
 // @access  Private
-// ===================================================================
 const verifyVNPayReturn = asyncHandler(async (req, res) => {
     const vnpay = getVNPay();
     const params = req.body;

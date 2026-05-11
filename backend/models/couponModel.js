@@ -5,38 +5,38 @@ const couponSchema = mongoose.Schema({
         type: String,
         required: true,
         unique: true,
-        uppercase: true, // Tự động chuyển thành chữ hoa, tránh nhập sai hoa thường
+        uppercase: true,
         trim: true,
     },
     discountType: {
         type: String,
-        enum: ['percentage', 'fixed'], // percentage = giảm %, fixed = giảm tiền mặt
+        enum: ['percentage', 'fixed'],
         required: true,
         default: 'percentage',
     },
     discountValue: {
         type: Number,
-        required: true, // VD: 10 (nếu là %), hoặc 50000 (nếu là tiền mặt)
+        required: true,
     },
     minOrderValue: {
         type: Number,
-        default: 0, // Đơn tối thiểu bao nhiêu tiền mới được dùng
+        default: 0,
     },
     usageLimit: {
         type: Number,
-        default: 100, // Tối đa bao nhiêu lượt dùng
+        default: 100,
     },
     usedCount: {
         type: Number,
-        default: 0, // Đã được dùng bao nhiêu lần rồi
+        default: 0,
     },
     expirationDate: {
         type: Date,
-        required: true, // Ngày hết hạn
+        required: true,
     },
     isActive: {
         type: Boolean,
-        default: true, // Admin có thể tắt mã mà không cần xóa
+        default: true,
     },
 }, {
     timestamps: true,

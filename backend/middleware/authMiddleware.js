@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
 const asyncHandler = require('express-async-handler');
 
-// Middleware bảo vệ: Kiểm tra người dùng có đăng nhập (có Token hợp lệ) hay không
+// Middleware bảo vệ
 const protect = asyncHandler(async (req, res, next) => {
     let token;
 
@@ -18,8 +18,8 @@ const protect = asyncHandler(async (req, res, next) => {
             // Tìm user trong DB theo ID, bỏ trường password ra
             req.user = await User.findById(decoded.id).select('-password');
 
-            next(); // Cho đi tiếp vào route
-            return; // Dừng tại đây, không chạy tiếp xuống dưới
+            next();
+            return;
         } catch (error) {
             res.status(401);
             throw new Error('Token không hợp lệ, vui lòng đăng nhập lại!');
@@ -32,11 +32,10 @@ const protect = asyncHandler(async (req, res, next) => {
     }
 });
 
-// Middleware xác quyền Admin: Chỉ cho phép tài khoản Admin đi tiếp
+// Middleware xác quyền Admin
 const admin = (req, res, next) => {
-    // req.user đã được gán bởi middleware protect ở trên
     if (req.user && req.user.role === 'admin') {
-        next(); // Đã là Admin, cho qua
+        next();
     } else {
         res.status(401);
         throw new Error('Từ chối truy cập. Bạn không có quyền Admin!');

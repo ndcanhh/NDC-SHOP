@@ -96,11 +96,11 @@ const OrderDetailScreen = () => {
   return (
     <div className="py-3">
       {/* Header */}
-      <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
-        <Link className="btn btn-light border shadow-sm d-inline-flex align-items-center gap-2" to="/orders">
+      <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+        <Link className="btn btn-light border shadow-sm d-inline-flex align-items-center gap-2 rounded-pill px-4 py-2 fw-bold" to="/orders">
           <FaArrowLeft /> Quay lại danh sách đơn hàng
         </Link>
-        <Badge bg={getStatusBadge(order.status)} className="px-4 py-2 fs-6">
+        <Badge bg={getStatusBadge(order.status)} className="px-4 py-2 fs-6 rounded-pill shadow-sm">
           {order.status}
         </Badge>
       </div>
@@ -113,11 +113,11 @@ const OrderDetailScreen = () => {
       <Row className="g-3">
         {/* CỘT TRÁI: Danh sách sản phẩm */}
         <Col lg={8}>
-          <Card className="border-0 shadow-sm mb-3">
-            <Card.Header className="bg-white border-bottom fw-bold">
+          <Card className="border-0 shadow-sm mb-4 rounded-4 overflow-hidden">
+            <Card.Header className="bg-light border-0 fw-bold py-3 px-4">
               Sản phẩm đã đặt ({order.orderItems.length} loại)
             </Card.Header>
-            <ListGroup variant="flush">
+            <ListGroup variant="flush" className="px-2">
               {order.orderItems.map((item, idx) => (
                 <ListGroup.Item key={idx} className="py-3 border-0 border-bottom">
                   <div className="d-flex gap-3 align-items-start">
@@ -162,14 +162,14 @@ const OrderDetailScreen = () => {
           </Card>
 
           {/* Địa chỉ giao hàng */}
-          <Card className="border-0 shadow-sm">
-            <Card.Header className="bg-white border-bottom fw-bold">
+          <Card className="border-0 shadow-sm rounded-4 overflow-hidden">
+            <Card.Header className="bg-light border-0 fw-bold py-3 px-4">
               <FaMapMarkerAlt className="me-2 text-danger" />
               Địa chỉ giao hàng
             </Card.Header>
-            <Card.Body>
-              <p className="mb-1"><strong>Người nhận:</strong> {order.shippingAddress.fullName || userInfo.name}</p>
-              <p className="mb-1"><strong>Số điện thoại:</strong> {order.shippingAddress.phone}</p>
+            <Card.Body className="px-4 pb-4 pt-3">
+              <p className="mb-2"><strong>Người nhận:</strong> {order.shippingAddress.fullName || userInfo.name}</p>
+              <p className="mb-2"><strong>Số điện thoại:</strong> {order.shippingAddress.phone}</p>
               <p className="mb-0"><strong>Địa chỉ:</strong> {order.shippingAddress.address}, {order.shippingAddress.city}</p>
             </Card.Body>
           </Card>
@@ -178,12 +178,13 @@ const OrderDetailScreen = () => {
         {/* CỘT PHẢI: Tóm tắt & hành động */}
         <Col lg={4}>
           {/* Thông tin thanh toán */}
-          <Card className="border-0 shadow-sm mb-3">
-            <Card.Header className="bg-white border-bottom fw-bold">
+          {/* Thông tin thanh toán */}
+          <Card className="border-0 shadow-sm mb-4 rounded-4 overflow-hidden">
+            <Card.Header className="bg-light border-0 fw-bold py-3 px-4">
               <FaCreditCard className="me-2 text-danger" />
               Thanh toán
             </Card.Header>
-            <ListGroup variant="flush">
+            <ListGroup variant="flush" className="px-2">
               <ListGroup.Item className="d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <span className="text-muted">Phương thức:</span>
                 <span className="fw-semibold">{order.paymentMethod}</span>
@@ -214,25 +215,26 @@ const OrderDetailScreen = () => {
           </Card>
 
           {/* Thời gian đặt hàng */}
-          <Card className="border-0 shadow-sm mb-3">
-            <Card.Body className="small text-muted">
-              <div>Đặt lúc: <strong>{new Date(order.createdAt).toLocaleString('vi-VN')}</strong></div>
+          {/* Thời gian đặt hàng */}
+          <Card className="border-0 shadow-sm mb-4 rounded-4 overflow-hidden">
+            <Card.Body className="px-4 py-3 small text-muted bg-light border-0">
+              <div>Đặt lúc: <strong className="text-dark">{new Date(order.createdAt).toLocaleString('vi-VN')}</strong></div>
               {order.isPaid && order.paidAt && (
-                <div className="mt-1">Thanh toán lúc: <strong>{new Date(order.paidAt).toLocaleString('vi-VN')}</strong></div>
+                <div className="mt-1">Thanh toán lúc: <strong className="text-dark">{new Date(order.paidAt).toLocaleString('vi-VN')}</strong></div>
               )}
             </Card.Body>
           </Card>
 
           {/* Nút hành động */}
           {!order.isPaid && order.paymentMethod === 'VNPay' && order.status !== 'Đã hủy' && (
-            <Button variant="danger" className="w-100 mb-2" onClick={handleVNPayRetry}>
+            <Button variant="danger" className="w-100 mb-3 rounded-pill py-2 fw-bold shadow-sm" onClick={handleVNPayRetry}>
               Thanh toán lại qua VNPay
             </Button>
           )}
           {canCancel && (
             <Button
               variant="outline-danger"
-              className="w-100"
+              className="w-100 rounded-pill py-2 fw-bold shadow-sm border-2"
               onClick={handleCancel}
               disabled={cancelling}
             >

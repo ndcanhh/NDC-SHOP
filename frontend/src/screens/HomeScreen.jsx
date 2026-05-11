@@ -87,7 +87,7 @@ const HomeScreen = () => {
     <>
       {/* Banner Khuyến Mãi */}
       <div style={{ width: '75%', margin: '0 auto' }}>
-        <Carousel className="mb-4 shadow-sm promo-carousel" style={{ borderRadius: '15px', overflow: 'hidden' }}>
+        <Carousel className="mb-4 shadow-sm promo-carousel rounded-4 overflow-hidden border-0">
           <Carousel.Item>
             <img
               className="d-block w-100"
@@ -127,7 +127,7 @@ const HomeScreen = () => {
           {/* 1. ĐIỆN THOẠI NỔI BẬT (Random) */}
           <ProductSection
             title="ĐIỆN THOẠI NỔI BẬT"
-            icon={<FaStar className="text-warning" />}
+            // icon={<FaStar className="text-warning" />}
             products={featuredProducts}
             linkTo="/products/all"
             accentColor="#dc3545"
@@ -137,7 +137,7 @@ const HomeScreen = () => {
           {newProducts.length > 0 && (
             <ProductSection
               title="ĐIỆN THOẠI MỚI"
-              icon={<FaBolt className="text-success" />}
+              // icon={<FaBolt className="text-success" />}
               products={newProducts}
               linkTo="/products/new"
               accentColor="#198754"
@@ -148,7 +148,7 @@ const HomeScreen = () => {
           {hotProducts.length > 0 && (
             <ProductSection
               title="ĐIỆN THOẠI HOT"
-              icon={<FaFire className="text-danger" />}
+              // icon={<FaFire className="text-danger" />}
               products={hotProducts}
               linkTo="/products/hot"
               accentColor="#dc3545"

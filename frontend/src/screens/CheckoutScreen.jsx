@@ -177,10 +177,10 @@ const CheckoutScreen = () => {
       <Row className="g-4">
         {/* Cột trái: Form nhập địa chỉ */}
         <Col md={7}>
-          <Card className="border-0 shadow-sm p-4 mb-4">
+          <Card className="border-0 shadow-sm p-4 mb-4 rounded-4 bg-white">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h5 className="fw-bold mb-0">Địa chỉ giao hàng</h5>
-                <Link to="/profile" className="btn btn-outline-danger btn-sm d-flex align-items-center gap-1">
+                <Link to="/profile" className="btn btn-outline-danger btn-sm d-flex align-items-center gap-1 rounded-pill px-3 shadow-sm">
                     <FaUserEdit /> Thêm / Sửa địa chỉ
                 </Link>
             </div>
@@ -197,7 +197,7 @@ const CheckoutScreen = () => {
                         {addresses.map((addr) => (
                             <label 
                                 key={addr._id} 
-                                className={`d-block p-3 mb-2 border rounded cursor-pointer transition-all ${selectedAddressId === addr._id ? 'border-danger bg-danger-subtle' : 'border-light-subtle'}`}
+                                className={`d-block p-3 mb-3 border-0 shadow-sm rounded-4 cursor-pointer transition-all ${selectedAddressId === addr._id ? 'bg-danger-subtle border border-danger' : 'bg-light'}`}
                                 style={{ cursor: 'pointer' }}
                             >
                                 <div className="d-flex align-items-start gap-3">
@@ -214,7 +214,7 @@ const CheckoutScreen = () => {
                                             <span className="fw-bold fs-6">{addr.recipientName}</span>
                                             <span className="mx-2 text-muted">|</span>
                                             <span className="fw-semibold text-muted">{addr.phone}</span>
-                                            {addr.isDefault && <span className="badge bg-danger ms-2">Mặc định</span>}
+                                            {addr.isDefault && <span className="badge bg-danger ms-2 rounded-pill shadow-sm">Mặc định</span>}
                                         </div>
                                         <div className="text-secondary small">
                                             <FaMapMarkerAlt className="me-1" />
@@ -228,7 +228,7 @@ const CheckoutScreen = () => {
 
                     <h5 className="fw-bold mb-3 mt-4">Phương thức thanh toán</h5>
                     <div className="payment-selection mb-4">
-                      <label className={`d-block p-3 mb-2 border rounded cursor-pointer transition-all ${paymentMethod === 'COD' ? 'border-danger bg-danger-subtle' : 'border-light-subtle'}`} style={{ cursor: 'pointer' }}>
+                      <label className={`d-block p-3 mb-3 border-0 shadow-sm rounded-4 cursor-pointer transition-all ${paymentMethod === 'COD' ? 'bg-danger-subtle border border-danger' : 'bg-light'}`} style={{ cursor: 'pointer' }}>
                         <div className="d-flex align-items-center gap-3">
                           <Form.Check 
                             type="radio" 
@@ -242,7 +242,7 @@ const CheckoutScreen = () => {
                           </div>
                         </div>
                       </label>
-                      <label className={`d-block p-3 mb-2 border rounded cursor-pointer transition-all ${paymentMethod === 'VNPay' ? 'border-danger bg-danger-subtle' : 'border-light-subtle'}`} style={{ cursor: 'pointer' }}>
+                      <label className={`d-block p-3 mb-3 border-0 shadow-sm rounded-4 cursor-pointer transition-all ${paymentMethod === 'VNPay' ? 'bg-danger-subtle border border-danger' : 'bg-light'}`} style={{ cursor: 'pointer' }}>
                         <div className="d-flex align-items-center gap-3">
                           <Form.Check 
                             type="radio" 
@@ -269,7 +269,7 @@ const CheckoutScreen = () => {
                     <Button
                         type="submit"
                         variant="danger"
-                        className="buy-btn w-100 py-2 fs-5 d-flex align-items-center justify-content-center gap-2"
+                        className="buy-btn w-100 py-3 fs-5 d-flex align-items-center justify-content-center gap-2 rounded-pill fw-bold shadow-sm"
                         disabled={loading || addresses.length === 0 || !selectedAddressId}
                     >
                         {loading ? (
@@ -286,11 +286,11 @@ const CheckoutScreen = () => {
 
         {/* Cột phải: Tóm tắt đơn hàng */}
         <Col md={5}>
-          <Card className="border-0 shadow-sm">
+          <Card className="border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+            <Card.Header className="bg-light border-0 fw-bold py-3 px-4">
+              <h5 className="mb-0 fw-bold">Đơn hàng của bạn</h5>
+            </Card.Header>
             <ListGroup variant="flush">
-              <ListGroup.Item className="bg-light">
-                <h5 className="mb-0 fw-bold">Đơn hàng của bạn</h5>
-              </ListGroup.Item>
 
               {cartItems.map((item) => (
                 <ListGroup.Item key={item._id} className="py-3">
@@ -340,14 +340,14 @@ const CheckoutScreen = () => {
                     <div className="d-flex gap-2">
                       <input
                         type="text"
-                        className="form-control form-control-sm"
+                        className="form-control rounded-pill px-3 bg-light border-0 shadow-none"
                         placeholder="Nhập mã..."
                         value={couponCode}
                         onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                         onKeyDown={(e) => e.key === 'Enter' && handleApplyCoupon()}
                       />
                       <button
-                        className="btn btn-sm btn-outline-danger px-3"
+                        className="btn btn-danger rounded-pill px-4 shadow-sm"
                         onClick={handleApplyCoupon}
                         disabled={couponLoading || !couponCode.trim()}
                       >

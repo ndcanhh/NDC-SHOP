@@ -3,9 +3,9 @@ import { Row, Col, Card } from 'react-bootstrap';
 import { FaStore, FaTrophy, FaShieldAlt, FaHeadset, FaTruck, FaStar } from 'react-icons/fa';
 
 const stats = [
-  { icon: <FaStore size={28} />, value: '2020', label: 'Năm thành lập' },
-  { icon: <FaStar size={28} />, value: '10.000+', label: 'Khách hàng hài lòng' },
-  { icon: <FaTrophy size={28} />, value: '500+', label: 'Sản phẩm chính hãng' },
+  { icon: <FaStore size={28} />, value: '2026', label: 'Năm thành lập' },
+  { icon: <FaStar size={28} />, value: '500+', label: 'Khách hàng hài lòng' },
+  { icon: <FaTrophy size={28} />, value: '50+', label: 'Sản phẩm chính hãng' },
   { icon: <FaHeadset size={28} />, value: '24/7', label: 'Hỗ trợ khách hàng' },
 ];
 
@@ -25,7 +25,7 @@ const AboutScreen = () => {
       </h3>
 
       {/* Banner giới thiệu */}
-      <Card className="border-0 shadow-sm mb-4 overflow-hidden">
+      <Card className="border-0 shadow-sm mb-4 rounded-4 overflow-hidden bg-white">
         <div className="about-banner p-5 text-white text-center" style={{ background: 'linear-gradient(135deg, #d70018, #ff4d4d)' }}>
           <h2 className="fw-bold mb-2">NDC SHOP</h2>
           <p className="mb-0 fs-5">Chuyên điện thoại chính hãng — Uy tín là trên hết</p>
@@ -33,10 +33,10 @@ const AboutScreen = () => {
       </Card>
 
       {/* Giới thiệu văn bản */}
-      <Card className="border-0 shadow-sm p-4 mb-4">
+      <Card className="border-0 shadow-sm p-4 mb-4 rounded-4 bg-white">
         <h5 className="fw-bold text-danger mb-3">Câu chuyện của chúng tôi</h5>
         <p className="text-muted lh-lg">
-          NDC SHOP được thành lập năm 2020 với sứ mệnh mang đến cho người dùng Việt Nam những chiếc điện thoại 
+          NDC SHOP được thành lập năm 2026 với sứ mệnh mang đến cho người dùng Việt Nam những chiếc điện thoại 
           chính hãng chất lượng cao với mức giá cạnh tranh nhất thị trường.
         </p>
         <p className="text-muted lh-lg">
@@ -45,7 +45,7 @@ const AboutScreen = () => {
         </p>
         <p className="text-muted lh-lg mb-0">
           Với đội ngũ nhân viên tư vấn chuyên nghiệp và hệ thống kho hàng hiện đại, chúng tôi tự hào phục vụ 
-          hơn 10.000 khách hàng trên toàn quốc.
+          hơn 500 khách hàng trên toàn quốc.
         </p>
       </Card>
 
@@ -53,7 +53,7 @@ const AboutScreen = () => {
       <Row className="g-3 mb-4">
         {stats.map((stat, i) => (
           <Col key={i} xs={6} md={3}>
-            <Card className="border-0 shadow-sm text-center p-3 h-100">
+            <Card className="border-0 shadow-sm text-center p-3 h-100 rounded-4 bg-white">
               <div className="text-danger mb-2">{stat.icon}</div>
               <div className="fw-bold fs-4 text-danger">{stat.value}</div>
               <div className="text-muted small">{stat.label}</div>
@@ -67,7 +67,7 @@ const AboutScreen = () => {
       <Row className="g-3">
         {values.map((v, i) => (
           <Col key={i} md={6}>
-            <Card className="border-0 shadow-sm p-3 h-100">
+            <Card className="border-0 shadow-sm p-3 h-100 rounded-4 bg-white">
               <div className="d-flex align-items-start gap-3">
                 <div className="mt-1">{v.icon}</div>
                 <div>

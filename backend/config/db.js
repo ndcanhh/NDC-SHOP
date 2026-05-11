@@ -1,12 +1,12 @@
-const mongoose = require('mongoose'); // Gọi thư viện Mongoose chuyên làm việc với MongoDB
+const mongoose = require('mongoose'); 
 
 // Hàm kết nối CSDL
 const connectDB = async () => {
     try {
-        // Cố gắng kết nối bằng địa chỉ được ghi trong file .env
+        // Kết nối bằng địa chỉ trong .env
         const conn = await mongoose.connect(process.env.MONGO_URI);
 
-        // Nếu kết nối thành công, in ra để báo hiệu
+        // Kết nối thành công
         console.log(`Kết nối Database thành công: ${conn.connection.host}`);
     } catch (error) {
         console.error(`Lỗi kết nối Database: ${error.message}`);

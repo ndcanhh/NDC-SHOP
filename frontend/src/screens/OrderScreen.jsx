@@ -146,18 +146,18 @@ const OrderScreen = () => {
         <div className="text-center py-5">
           <FaBox size={50} className="text-muted mb-3" />
           <h5 className="text-muted">Bạn chưa có đơn hàng nào</h5>
-          <Link to="/" className="btn btn-danger mt-3">Đi mua sắm ngay</Link>
+          <Link to="/" className="btn btn-danger rounded-pill px-4 py-2 mt-3 fw-bold shadow-sm">Đi mua sắm ngay</Link>
         </div>
       ) : (
-        <Row className="g-3">
+        <Row className="g-4">
           {orders.map((order) => (
             <Col key={order._id} xs={12}>
-              <Card className="border-0 shadow-sm">
-                <Card.Body className="p-3">
+              <Card className="border-0 shadow-sm rounded-4 overflow-hidden mb-2">
+                <Card.Body className="p-4">
                   <Row className="align-items-center">
                     {/* Mã đơn + ngày */}
                     <Col md={3}>
-                      <small className="text-muted">Mã đơn hàng</small>
+                      <small className="text-muted text-uppercase fw-semibold">Mã đơn hàng</small>
                       <div className="fw-bold small" style={{ wordBreak: 'break-all' }}>
                         #{order._id.slice(-8).toUpperCase()}
                       </div>
@@ -202,12 +202,12 @@ const OrderScreen = () => {
                     </Col>
 
                     {/* Trạng thái + Hành động */}
-                    <Col md={3} className="d-flex align-items-center justify-content-between gap-2">
+                    <Col md={3} className="d-flex align-items-center justify-content-between gap-3 mt-3 mt-md-0">
                       {/* Cột badge + nút */}
                       <div className="d-flex flex-column gap-2 flex-grow-1">
                         <Badge
                           bg={getStatusBadge(order.status)}
-                          className="px-2 py-2 text-center"
+                          className="px-3 py-2 text-center rounded-pill shadow-sm"
                           style={{ fontSize: '12px', whiteSpace: 'normal' }}
                         >
                           {order.status}
@@ -215,7 +215,7 @@ const OrderScreen = () => {
                         {order.paymentMethod === 'VNPay' && order.status !== 'Đã hủy' && (
                           <Badge
                             bg={order.isPaid ? 'success' : 'secondary'}
-                            className="px-2 py-2 text-center"
+                            className="px-3 py-2 text-center rounded-pill shadow-sm"
                             style={{ fontSize: '12px' }}
                           >
                             {order.isPaid ? 'Đã Thanh Toán' : 'Chưa Thanh Toán'}
@@ -224,7 +224,7 @@ const OrderScreen = () => {
                         {!order.isPaid && order.paymentMethod === 'VNPay' && order.status !== 'Đã hủy' && (
                           <button
                             onClick={() => handleVNPayRetry(order._id)}
-                            className="btn btn-sm btn-outline-danger"
+                            className="btn btn-sm btn-outline-danger rounded-pill fw-bold"
                             style={{ fontSize: '12px' }}
                           >
                             Thanh toán lại
@@ -236,7 +236,7 @@ const OrderScreen = () => {
                         ) && (
                           <button
                             onClick={() => cancelOrderHandler(order._id)}
-                            className="btn btn-sm btn-danger"
+                            className="btn btn-sm btn-danger rounded-pill fw-bold shadow-sm"
                             style={{ fontSize: '12px' }}
                           >
                             Hủy đơn hàng
@@ -248,10 +248,10 @@ const OrderScreen = () => {
                       <Link
                         to={`/orders/${order._id}`}
                         title="Xem chi tiết đơn hàng"
-                        className="btn btn-light border"
-                        style={{ padding: '6px 8px', flexShrink: 0 }}
+                        className="btn btn-light border rounded-circle shadow-sm d-flex align-items-center justify-content-center p-0"
+                        style={{ width: '40px', height: '40px', flexShrink: 0 }}
                       >
-                        <FaEye size={16} className="text-secondary" />
+                        <FaEye size={18} className="text-secondary" />
                       </Link>
                     </Col>
                   </Row>
@@ -268,7 +268,7 @@ const OrderScreen = () => {
       )}
 
       <div className="mt-4">
-        <Link className="btn btn-light border shadow-sm d-inline-flex align-items-center gap-2" to="/">
+        <Link className="btn btn-light border shadow-sm d-inline-flex align-items-center gap-2 rounded-pill px-4 fw-bold" to="/">
           <FaArrowLeft /> Tiếp tục mua sắm
         </Link>
       </div>

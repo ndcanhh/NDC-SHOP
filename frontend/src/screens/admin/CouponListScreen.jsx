@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Table, Button, Spinner, Alert, Modal, Form, Row, Col, Badge } from 'react-bootstrap';
+import { Table, Button, Spinner, Alert, Modal, Form, Row, Col, Badge, Card } from 'react-bootstrap';
 import { FaTag, FaPlus, FaTrash } from 'react-icons/fa';
 import axios from 'axios';
 import { AuthContext } from '../../context/authContextValue';
@@ -80,10 +80,27 @@ const CouponListScreen = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Regex: Chỉ chữ cái và số, từ 3-20 ký tự
+    const codeRegex = /^[A-Z0-9]{3,20}$/;
+    if (!codeRegex.test(formData.code)) {
+      toast.error('Mã giảm giá không hợp lệ! (Chỉ dùng chữ cái và số, từ 3-20 ký tự)');
+      return;
+    }
+
+    if (formData.discountType === 'percentage' && formData.discountValue > 100) {
+      toast.error('Giá trị giảm theo % không được vượt quá 100%!');
+      return;
+    }
+
+    if (formData.discountValue <= 0) {
+      toast.error('Giá trị giảm phải lớn hơn 0!');
+      return;
+    }
+
     setSubmitting(true);
     try {
       await axios.post('/api/coupons', formData, config);
-      setShowModal(false);
       toast.success('Đã tạo mã giảm giá mới!');
       setShowModal(false);
       setRefresh(!refresh);
@@ -108,82 +125,83 @@ const CouponListScreen = () => {
     <>
       <Row className="align-items-center mb-4">
         <Col>
-          <h2><FaTag className="me-2 text-danger" />Quản lý Mã Giảm Giá</h2>
+          <h3 className="fw-bold mb-0">Quản lý mã giảm giá</h3>
         </Col>
         <Col className="text-end">
-          <Button className="buy-btn" onClick={openModal}>
+          <Button variant="danger" className="rounded-pill px-4 fw-bold shadow-sm" onClick={openModal}>
             <FaPlus className="me-2" />Tạo mã mới
           </Button>
         </Col>
       </Row>
 
       {loading ? (
-        <div className="text-center py-5"><Spinner animation="border" variant="danger" /></div>
+        <div className="text-center p-5">
+          <Spinner animation="border" variant="danger" />
+        </div>
       ) : error ? (
-        <Alert variant="danger">{error}</Alert>
+        <Alert variant="danger" className="border-0 shadow-sm">{error}</Alert>
       ) : (
-        <Table striped bordered hover responsive className="table-sm text-center align-middle">
-          <thead className="table-dark">
-            <tr>
-              <th>MÃ</th>
-              <th>LOẠI</th>
-              <th>GIÁ TRỊ GIẢM</th>
-              <th>ĐƠN TỐI THIỂU</th>
-              <th>ĐÃ DÙNG</th>
-              <th>HẠN SỬ DỤNG</th>
-              <th>TRẠNG THÁI</th>
-              <th>HÀNH ĐỘNG</th>
-            </tr>
-          </thead>
-          <tbody>
-            {coupons.length === 0 ? (
-              <tr><td colSpan={8} className="text-muted py-4">Chưa có mã giảm giá nào.</td></tr>
-            ) : coupons.map((c) => (
-              <tr key={c._id}>
-                <td>
-                  <span className="badge bg-dark fs-6 px-3 py-2" style={{ letterSpacing: '1px' }}>
-                    {c.code}
-                  </span>
-                </td>
-                <td>
-                  {c.discountType === 'percentage'
-                    ? <Badge bg="info" text="dark">Phần trăm (%)</Badge>
-                    : <Badge bg="primary">Tiền mặt (đ)</Badge>}
-                </td>
-                <td className="fw-bold text-danger">
-                  {c.discountType === 'percentage'
-                    ? `${c.discountValue}%`
-                    : `${c.discountValue.toLocaleString('vi-VN')} đ`}
-                </td>
-                <td>{c.minOrderValue.toLocaleString('vi-VN')} đ</td>
-                <td>
-                  <span className={c.usedCount >= c.usageLimit ? 'text-danger fw-bold' : ''}>
-                    {c.usedCount} / {c.usageLimit}
-                  </span>
-                </td>
-                <td className={isExpired(c.expirationDate) ? 'text-danger' : ''}>
-                  {new Date(c.expirationDate).toLocaleDateString('vi-VN')}
-                </td>
-                <td 
-                  onClick={() => handleToggle(c)} 
-                  style={{ cursor: 'pointer' }}
-                  title="Click để Bật/Tắt mã"
-                >
-                  {getStatus(c)}
-                </td>
-                <td>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => handleDelete(c._id, c.code)}
-                  >
-                    <FaTrash className="me-1" />Xóa
-                  </Button>
-                </td>
+        <Card className="border-0 shadow-sm rounded-4 overflow-hidden">
+          <Table hover responsive className="mb-0 align-middle">
+            <thead className="bg-light">
+              <tr className="text-muted small text-uppercase fw-bold">
+                <th className="ps-4 py-3">Mã giảm giá</th>
+                <th className="py-3">Loại</th>
+                <th className="py-3">Giá trị giảm</th>
+                <th className="py-3">Đơn tối thiểu</th>
+                <th className="py-3 text-center">Đã dùng</th>
+                <th className="py-3 text-center">Hạn sử dụng</th>
+                <th className="py-3 text-center">Trạng thái</th>
+                <th className="py-3 text-end pe-4">Hành động</th>
               </tr>
-            ))}
-          </tbody>
-        </Table>
+            </thead>
+            <tbody>
+              {coupons.length === 0 ? (
+                <tr><td colSpan={8} className="text-muted text-center py-5">Chưa có mã giảm giá nào.</td></tr>
+              ) : coupons.map((c) => (
+                <tr key={c._id}>
+                  <td className="ps-4">
+                    <span className="badge bg-dark fs-6 px-3 py-2" style={{ letterSpacing: '1px' }}>
+                      {c.code}
+                    </span>
+                  </td>
+                  <td>
+                    {c.discountType === 'percentage'
+                      ? <Badge pill bg="info" className="text-dark px-3">Phần trăm (%)</Badge>
+                      : <Badge pill bg="primary" className="px-3">Tiền mặt (đ)</Badge>}
+                  </td>
+                  <td className="fw-bold text-danger">
+                    {c.discountType === 'percentage'
+                      ? `${c.discountValue}%`
+                      : `${c.discountValue.toLocaleString('vi-VN')} đ`}
+                  </td>
+                  <td>{c.minOrderValue.toLocaleString('vi-VN')} đ</td>
+                  <td className="text-center">
+                    <span className={c.usedCount >= c.usageLimit ? 'text-danger fw-bold' : 'text-muted fw-medium'}>
+                      {c.usedCount} / {c.usageLimit}
+                    </span>
+                  </td>
+                  <td className={`text-center ${isExpired(c.expirationDate) ? 'text-danger fw-bold' : 'text-muted'}`}>
+                    {new Date(c.expirationDate).toLocaleDateString('vi-VN')}
+                  </td>
+                  <td className="text-center" onClick={() => handleToggle(c)} style={{ cursor: 'pointer' }} title="Click để Bật/Tắt mã">
+                    {getStatus(c)}
+                  </td>
+                  <td className="text-end pe-4">
+                    <Button
+                      variant="outline-danger"
+                      className="btn-sm border-0 bg-light rounded-3"
+                      onClick={() => handleDelete(c._id, c.code)}
+                      title="Xóa mã giảm giá"
+                    >
+                      <FaTrash />
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </Card>
       )}
 
       {/* Modal tạo mã mới */}

@@ -32,7 +32,6 @@ import ProductListScreen from './screens/admin/ProductListScreen.jsx'
 import OrderListScreen from './screens/admin/OrderListScreen.jsx'
 import CouponListScreen from './screens/admin/CouponListScreen.jsx'
 import ContactListScreen from './screens/admin/ContactListScreen.jsx'
-import NewsListScreen from './screens/admin/NewsListScreen.jsx'
 
 // Các Kho Lưu Trữ Chung (Context)
 import { CartProvider } from './context/CartContext.jsx'
@@ -73,7 +72,6 @@ const router = createBrowserRouter(
             <Route path='orderlist' element={<OrderListScreen />} />
             <Route path='couponlist' element={<CouponListScreen />} />
             <Route path='contactlist' element={<ContactListScreen />} />
-            <Route path='newslist' element={<NewsListScreen />} />
          </Route>
       </Route>
     </Route>

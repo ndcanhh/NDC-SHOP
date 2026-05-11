@@ -98,8 +98,8 @@ const CompareScreen = () => {
                       if (searchTerm1) setShowSuggestions1(true);
                     }}
                     onBlur={() => setTimeout(() => setShowSuggestions1(false), 200)}
-                    className="mb-2 shadow-none border-danger form-control-lg"
-                    style={{ borderRadius: '10px' }}
+                    className="mb-2 shadow-sm border-0 form-control-lg bg-white px-4"
+                    style={{ borderRadius: '1rem', fontSize: '1.1rem' }}
                   />
                   {showSuggestions1 && searchTerm1 && filteredProducts1.length > 0 && (
                     <div className="search-suggestions" style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 1000, marginTop: '-5px' }}>
@@ -142,8 +142,8 @@ const CompareScreen = () => {
                       if (searchTerm2) setShowSuggestions2(true);
                     }}
                     onBlur={() => setTimeout(() => setShowSuggestions2(false), 200)}
-                    className="mb-2 shadow-none border-primary form-control-lg"
-                    style={{ borderRadius: '10px' }}
+                    className="mb-2 shadow-sm border-0 form-control-lg bg-white px-4"
+                    style={{ borderRadius: '1rem', fontSize: '1.1rem' }}
                   />
                   {showSuggestions2 && searchTerm2 && filteredProducts2.length > 0 && (
                     <div className="search-suggestions" style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 1000, marginTop: '-5px' }}>

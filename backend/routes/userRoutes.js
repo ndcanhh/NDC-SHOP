@@ -8,7 +8,6 @@ router.route('/')
     .post(registerUser)
     .get(protect, admin, getUsers);
 
-// Khách muốn đăng nhập
 router.post('/login', authUser);
 
 // Cập nhật thông tin cá nhân (cần đăng nhập)

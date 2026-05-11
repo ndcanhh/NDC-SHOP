@@ -67,7 +67,7 @@ const getMyOrders = asyncHandler(async (req, res) => {
 // @access  Private
 const getOrderById = asyncHandler(async (req, res) => {
     const order = await Order.findById(req.params.id);
-    if (order && order.user.toString() === req.user._id.toString()) {
+    if (order && (order.user.toString() === req.user._id.toString() || req.user.role === 'admin')) {
         res.json(order);
     } else {
         res.status(404);
@@ -137,31 +137,30 @@ const cancelOrder = asyncHandler(async (req, res) => {
     const order = await Order.findById(req.params.id);
 
     if (order) {
-        // Kiểm tra quyền sở hữu: Phải là đơn của chính mình mới được hủy
+        //Phải là đơn của chính mình mới được hủy
         if (order.user.toString() !== req.user._id.toString()) {
             res.status(401);
             throw new Error('Bạn không có quyền hủy đơn hàng này!');
         }
 
-        // Kiểm tra quy tắc hủy
         if (order.status === 'Đã hủy') {
             res.status(400);
             throw new Error('Đơn hàng đã được hủy trước đó.');
         }
 
-        // Quy tắc 1: COD chỉ được hủy khi chưa giao ĐVVC (Chờ xử lý)
+        // COD chỉ được hủy khi chưa giao ĐVVC
         if (order.paymentMethod === 'COD' && order.status !== 'Chờ xử lý') {
             res.status(400);
             throw new Error('Không thể hủy đơn hàng COD đã được bàn giao vận chuyển.');
         }
 
-        // Quy tắc 2: VNPay đã thanh toán thì không được tự hủy
+        // VNPay đã thanh toán thì k được tự hủy
         if (order.paymentMethod === 'VNPay' && order.isPaid) {
             res.status(400);
             throw new Error('Không thể tự hủy đơn hàng đã thanh toán qua VNPay. Vui lòng liên hệ Shop để được hoàn tiền.');
         }
 
-        // Quy tắc 3: Nếu là trạng thái khác (Đang giao, Thành công) thì cũng chặn luôn
+        // Nếu là trạng thái khác cũng k được huỷ
         if (order.status !== 'Chờ xử lý' && order.paymentMethod !== 'VNPay') {
             res.status(400);
             throw new Error('Trạng thái đơn hàng hiện tại không cho phép hủy.');
@@ -170,7 +169,7 @@ const cancelOrder = asyncHandler(async (req, res) => {
         order.status = 'Đã hủy';
         const updatedOrder = await order.save();
 
-        // NGHIỆP VỤ QUAN TRỌNG: Trả lại tồn kho
+        // Trả lại tồn kho
         for (const item of order.orderItems) {
             const product = await Product.findById(item.product);
             if (product) {
@@ -191,4 +190,19 @@ const cancelOrder = asyncHandler(async (req, res) => {
     }
 });
 
-module.exports = { createOrder, getMyOrders, getOrderById, getOrders, updateOrderStatus, cancelOrder };
+// @desc    Xóa đơn hàng (Cho Admin)
+// @route   DELETE /api/orders/:id
+// @access  Private/Admin
+const deleteOrder = asyncHandler(async (req, res) => {
+    console.log('Đang thực hiện xóa đơn hàng:', req.params.id);
+    const order = await Order.findById(req.params.id);
+    if (order) {
+        await order.deleteOne();
+        res.json({ message: 'Đã xóa đơn hàng thành công!' });
+    } else {
+        res.status(404);
+        throw new Error('Không tìm thấy đơn hàng!');
+    }
+});
+
+module.exports = { createOrder, getMyOrders, getOrderById, getOrders, updateOrderStatus, cancelOrder, deleteOrder };

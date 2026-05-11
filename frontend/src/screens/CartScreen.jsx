@@ -36,11 +36,12 @@ const CartScreen = () => {
         
         {/* Kiểm tra giỏ hàng có trống không */}
         {cartItems.length === 0 ? (
-          <div className="alert alert-info border-0 shadow-sm" style={{ backgroundColor: '#e9ecef', color: '#555' }}>
+          <div className="alert alert-info border-0 shadow-sm rounded-4" style={{ backgroundColor: '#e9ecef', color: '#555' }}>
             Giỏ hàng của bạn đang trống! <Link to="/" className="fw-bold text-brand-red">Đi mua sắm ngay</Link>
           </div>
         ) : (
-          <ListGroup variant="flush" className="shadow-sm rounded border">
+          <Card className="border-0 shadow-sm rounded-4 overflow-hidden">
+          <ListGroup variant="flush">
             {cartItems.map((item, index) => (
               <ListGroup.Item key={`${item._id}_${item.color || ''}_${item.storageLabel || ''}_${index}`} className="p-3">
                 <Row className="align-items-center text-center text-md-start">
@@ -71,13 +72,13 @@ const CartScreen = () => {
                   <Col md={3} className="text-center mb-2 mb-md-0">
                     <div className="d-flex align-items-center justify-content-center gap-2">
                       <Button
-                        variant="outline-secondary"
-                        size="sm"
+                        variant="light"
+                        className="rounded-circle border shadow-sm d-flex justify-content-center align-items-center"
                         disabled={item.qty <= 1}
                         onClick={() => updateQty(item._id, item.qty - 1, item.color, item.storageLabel)}
                         style={{ width: '32px', height: '32px', padding: 0 }}
                       >
-                        <FaMinus size={10} />
+                        <FaMinus size={10} className="text-secondary" />
                       </Button>
 
                       <span className="fw-bold fs-5" style={{ minWidth: '30px', textAlign: 'center' }}>
@@ -85,12 +86,12 @@ const CartScreen = () => {
                       </span>
 
                       <Button
-                        variant="outline-secondary"
-                        size="sm"
+                        variant="light"
+                        className="rounded-circle border shadow-sm d-flex justify-content-center align-items-center"
                         onClick={() => handleIncreaseQty(item)}
                         style={{ width: '32px', height: '32px', padding: 0 }}
                       >
-                        <FaPlus size={10} />
+                        <FaPlus size={10} className="text-secondary" />
                       </Button>
                     </div>
                     {/* Hiển thị khi đang ở mức tối đa */}
@@ -102,42 +103,45 @@ const CartScreen = () => {
                   </Col>
                   
                   {/* Nút xóa */}
-                  <Col md={2} className="text-center text-md-end">
+                  <Col md={2} className="text-center text-md-end d-flex justify-content-center justify-content-md-end">
                     <Button 
                         variant="light" 
-                        className="text-danger" 
+                        className="rounded-circle border shadow-sm d-flex align-items-center justify-content-center"
+                        style={{ width: '38px', height: '38px' }}
                         onClick={() => removeFromCart(item._id, item.color, item.storageLabel)}
+                        title="Xóa khỏi giỏ hàng"
                     >
-                      <FaTrash />
+                      <FaTrash className="text-danger" />
                     </Button>
                   </Col>
                 </Row>
               </ListGroup.Item>
             ))}
           </ListGroup>
+          </Card>
         )}
       </Col>
 
       <Col md={4}>
-        <Card className="shadow-sm border-0 mt-3 mt-md-0">
+        <Card className="shadow-sm border-0 mt-3 mt-md-0 rounded-4 overflow-hidden">
+          <Card.Header className="bg-light border-0 fw-bold py-3 px-4">
+            <h5 className="mb-0 fw-bold">Tiến hành đặt hàng</h5>
+          </Card.Header>
           <ListGroup variant="flush">
-            <ListGroup.Item className="bg-light">
-              <h4 className="mb-0 fw-bold">Tiến hành đặt hàng</h4>
-            </ListGroup.Item>
-            <ListGroup.Item>
-              <div className="d-flex justify-content-between my-2">
-                <span>Tổng số lượng:</span>
+            <ListGroup.Item className="p-4 border-0">
+              <div className="d-flex justify-content-between mb-3">
+                <span className="text-muted">Tổng số lượng:</span>
                 <span className="fw-bold">{totalQty} sản phẩm</span>
               </div>
-              <div className="d-flex justify-content-between my-2">
-                <span>Thành tiền:</span>
+              <div className="d-flex justify-content-between align-items-center mb-2">
+                <span className="text-muted">Thành tiền:</span>
                 <span className="text-brand-red fw-bold fs-4">{totalPrice.toLocaleString('vi-VN')} đ</span>
               </div>
             </ListGroup.Item>
-            <ListGroup.Item>
+            <ListGroup.Item className="p-4 pt-0 border-0">
               <Button
                 type="button"
-                className="buy-btn w-100 py-2 fs-5"
+                className="buy-btn w-100 py-3 fs-5 rounded-pill fw-bold shadow-sm"
                 disabled={cartItems.length === 0}
                 onClick={() => navigate(userInfo ? '/checkout' : '/login')}
               >

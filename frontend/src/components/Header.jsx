@@ -7,7 +7,7 @@ import axios from 'axios';
 import { CartContext } from '../context/cartContextDef';
 import { AuthContext } from '../context/authContextValue';
 
-// Hàm Cloudinary: resize ảnh nhỏ cho gợi ý tìm kiếm (60x60px)
+// resize ảnh nhỏ cho gợi ý tìm kiếm (60x60px)
 const optimizeUrl = (url, w = 60, h = 60) => {
     if (!url || !url.includes('cloudinary')) return url;
     return url.replace('/upload/', `/upload/c_fill,w_${w},h_${h},q_auto,f_auto/`);
@@ -18,19 +18,17 @@ const Header = () => {
   const { userInfo, logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  // ====== STATE CHO TÌM KIẾM ======
-  const [searchKeyword, setSearchKeyword] = useState('');   // Từ khóa người dùng gõ
-  const [suggestions, setSuggestions] = useState([]);        // Danh sách gợi ý từ API
-  const [showSuggestions, setShowSuggestions] = useState(false); // Hiện/ẩn dropdown
-  const searchRef = useRef(null); // Ref để phát hiện click ra ngoài → đóng dropdown
+  // STATE CHO TÌM KIẾM 
+  const [searchKeyword, setSearchKeyword] = useState(''); 
+  const [suggestions, setSuggestions] = useState([]);        
+  const [showSuggestions, setShowSuggestions] = useState(false); 
+  const searchRef = useRef(null); 
 
-  // ====== DEBOUNCE: Chờ 300ms sau khi ngừng gõ mới gọi API ======
-  // Tránh spam API mỗi lần nhấn phím (ví dụ gõ "iphone" = 6 phím = 6 lần gọi → lãng phí)
-  // Debounce = đợi người dùng ngừng gõ 300ms rồi mới gọi 1 lần duy nhất
+  // Chờ người dùng ngừng gõ 300ms rồi mới gọi 1 lần
   useEffect(() => {
     const timer = setTimeout(async () => {
       if (searchKeyword.trim().length < 2) {
-        setSuggestions([]);        // Reset gợi ý nếu chưa đủ 2 ký tự
+        setSuggestions([]);        
         setShowSuggestions(false);
         return;
       }
@@ -42,12 +40,11 @@ const Header = () => {
       } catch (error) {
         console.error('Lỗi tìm kiếm:', error);
       }
-    }, 300); // Debounce 300ms
+    }, 300); 
 
-    return () => clearTimeout(timer); // Hủy timer cũ nếu người dùng tiếp tục gõ
+    return () => clearTimeout(timer); 
   }, [searchKeyword]);
 
-  // ====== CLICK RA NGOÀI → ĐÓNG DROPDOWN ======
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (searchRef.current && !searchRef.current.contains(e.target)) {
@@ -58,7 +55,7 @@ const Header = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Khi chọn 1 gợi ý → chuyển tới trang chi tiết sản phẩm đó
+  // click vào 1 gợi ý → chuyển tới trang chi tiết sản phẩm đó
   const handleSelectSuggestion = (productId) => {
     setShowSuggestions(false);
     setSearchKeyword('');
@@ -73,7 +70,7 @@ const Header = () => {
 
   return (
     <>
-      {/* 1. Thanh Top Bar */}
+      {/* Thanh Top Bar */}
       <div className="topbar py-1 d-none d-lg-block" style={{ fontSize: '0.8rem' }}>
         <Container className="d-flex justify-content-between align-items-center px-5">
           
@@ -107,7 +104,7 @@ const Header = () => {
         </Container>
       </div>
 
-      {/* 2. Thanh Navbar */}
+      {/*Thanh Navbar */}
       <Navbar className="bg-brand-red custom-navbar shadow-sm" variant="dark" expand="lg">
         <Container>
           {/* Logo Text */}
@@ -123,7 +120,7 @@ const Header = () => {
             
             {/* Thanh Search — có dropdown gợi ý */}
             <div className="search-bar-container mx-auto my-3 my-lg-0 position-relative" style={{ maxWidth: '480px', width: '100%' }} ref={searchRef}>
-                <Form className="d-flex position-relative" onSubmit={(e) => {
+                <Form className="d-flex position-relative align-items-center" onSubmit={(e) => {
                     e.preventDefault();
                     if (searchKeyword.trim()) {
                       setShowSuggestions(false);
@@ -133,20 +130,21 @@ const Header = () => {
                     <FormControl
                         type="search"
                         placeholder="Nhập từ khóa tìm kiếm ..."
-                        className="search-input w-100"
+                        className="search-input w-100 rounded-pill px-4 py-2 border-0 shadow-none bg-white"
                         aria-label="Search"
                         value={searchKeyword}
                         onChange={(e) => setSearchKeyword(e.target.value)}
                         onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+                        style={{ paddingRight: '50px' }}
                     />
-                    <button type="submit" className="search-btn" aria-label="Tìm kiếm">
-                      <FaSearch />
+                    <button type="submit" className="search-btn rounded-circle d-flex align-items-center justify-content-center border-0 bg-danger text-white position-absolute shadow-sm" aria-label="Tìm kiếm" style={{ right: '6px', top: '50%', transform: 'translateY(-50%)', width: '32px', height: '32px' }}>
+                      <FaSearch size={14} />
                     </button>
                 </Form>
 
                 {/* Dropdown gợi ý tìm kiếm */}
                 {showSuggestions && suggestions.length > 0 && (
-                  <div className="search-suggestions">
+                  <div className="search-suggestions shadow-lg rounded-4 overflow-hidden border-0 mt-2">
                     {suggestions.map((product) => (
                       <div
                         key={product._id}
@@ -172,7 +170,7 @@ const Header = () => {
                   <span className="d-none d-lg-block" style={{ fontSize: '0.85rem' }}>Giỏ hàng</span>
                   
                   {cartItems.length > 0 && (
-                    <Badge pill bg="warning" text="dark" className="position-absolute top-0 start-100 translate-middle">
+                    <Badge pill bg="warning" text="dark" className="position-absolute top-0 start-100 translate-middle border border-2 border-white shadow-sm" style={{ transform: 'translate(-30%, -30%)' }}>
                       {cartItems.reduce((total, item) => total + (item.qty || 1), 0)}
                     </Badge>
                   )}

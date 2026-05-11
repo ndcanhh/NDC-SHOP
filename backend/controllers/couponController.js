@@ -1,11 +1,9 @@
 const asyncHandler = require('express-async-handler');
 const Coupon = require('../models/couponModel');
 
-// ============================================================
 // @desc    Áp dụng mã giảm giá (User gọi từ trang Checkout)
 // @route   POST /api/coupons/apply
 // @access  Private
-// ============================================================
 const applyCoupon = asyncHandler(async (req, res) => {
     const { code, orderTotal } = req.body;
 
@@ -69,21 +67,18 @@ const applyCoupon = asyncHandler(async (req, res) => {
     });
 });
 
-// ============================================================
+
 // @desc    Lấy danh sách tất cả mã giảm giá (Admin)
 // @route   GET /api/coupons
 // @access  Private/Admin
-// ============================================================
 const getCoupons = asyncHandler(async (req, res) => {
     const coupons = await Coupon.find({}).sort({ createdAt: -1 });
     res.json(coupons);
 });
 
-// ============================================================
 // @desc    Tạo mã giảm giá mới (Admin)
 // @route   POST /api/coupons
 // @access  Private/Admin
-// ============================================================
 const createCoupon = asyncHandler(async (req, res) => {
     const { code, discountType, discountValue, minOrderValue, usageLimit, expirationDate } = req.body;
 
@@ -106,11 +101,9 @@ const createCoupon = asyncHandler(async (req, res) => {
     res.status(201).json(created);
 });
 
-// ============================================================
 // @desc    Xóa mã giảm giá (Admin)
 // @route   DELETE /api/coupons/:id
 // @access  Private/Admin
-// ============================================================
 const deleteCoupon = asyncHandler(async (req, res) => {
     const coupon = await Coupon.findById(req.params.id);
     if (!coupon) {
@@ -121,11 +114,9 @@ const deleteCoupon = asyncHandler(async (req, res) => {
     res.json({ message: 'Đã xóa mã giảm giá thành công.' });
 });
 
-// ============================================================
 // @desc    Cập nhật mã giảm giá (Admin)
 // @route   PUT /api/coupons/:id
 // @access  Private/Admin
-// ============================================================
 const updateCoupon = asyncHandler(async (req, res) => {
     const coupon = await Coupon.findById(req.params.id);
     if (coupon) {

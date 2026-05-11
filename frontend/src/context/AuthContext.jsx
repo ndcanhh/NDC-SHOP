@@ -3,7 +3,6 @@ import axios from 'axios';
 import { AuthContext } from './authContextValue';
 
 export const AuthProvider = ({ children }) => {
-  // 2. Lấy hồ sơ cũ từ Chrome (Trình duyệt) nếu họ đã từng đăng nhập
   const storedUser = localStorage.getItem('userInfo');
   const userInfoFromStorage = storedUser ? JSON.parse(storedUser) : null;
 
@@ -18,7 +17,6 @@ export const AuthProvider = ({ children }) => {
     }
   }, [userInfo]);
 
-  // Hàm xử lý Đăng Nhập (Nói chuyện với anh Shipper Axios gọi về Backend)
   const login = async (email, password) => {
     try {
       const config = { headers: { 'Content-Type': 'application/json' } };
@@ -26,7 +24,6 @@ export const AuthProvider = ({ children }) => {
       // Gọi về API Đăng Nhập của Backend (Lấy thư mục token)
       const { data } = await axios.post('/api/users/login', { email, password }, config);
       
-      // Thành công -> Bỏ thông tin người dùng có chứa Thẻ thông hành vào kho
       setUserInfo(data);
       return { success: true };
     } catch (error) {

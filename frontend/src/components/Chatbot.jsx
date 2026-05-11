@@ -1,64 +1,141 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext, useCallback } from 'react';
 import { Card, Form, Button, Spinner } from 'react-bootstrap';
 import { FaComments, FaTimes, FaPaperPlane, FaRobot, FaUser } from 'react-icons/fa';
 import axios from 'axios';
+import { AuthContext } from '../context/authContextValue';
+import { Link, useLocation } from 'react-router-dom';
 
 // Gợi ý nhanh cho người dùng khi mở chatbot
 const quickReplies = ['Thanh toán', 'Giao hàng', 'Bảo hành', 'Đổi trả', 'Trả góp', 'Địa chỉ cửa hàng'];
 
+const INITIAL_MESSAGE = { sender: 'bot', text: 'Xin chào! 👋 Tôi là trợ lý AI của NDC Shop.\nBạn có thể hỏi tôi bất cứ điều gì về sản phẩm, thanh toán, giao hàng, bảo hành...' };
+
 const Chatbot = () => {
+  const { userInfo } = useContext(AuthContext);
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState(() => {
-    const savedMessages = localStorage.getItem('chatHistory');
-    if (savedMessages) {
-      try {
-        return JSON.parse(savedMessages);
-      } catch (error) {
-        console.error('Lỗi khi đọc lịch sử chat:', error);
-      }
-    }
-    return [
-      { sender: 'bot', text: 'Xin chào! 👋 Tôi là trợ lý AI của NDC Shop.\nBạn có thể hỏi tôi bất cứ điều gì về sản phẩm, thanh toán, giao hàng, bảo hành...' }
-    ];
-  });
-
-  // Tự động lưu toàn bộ tin nhắn vào localStorage mỗi khi mảng messages thay đổi
-  useEffect(() => {
-    localStorage.setItem('chatHistory', JSON.stringify(messages));
-  }, [messages]);
-
+  const [messages, setMessages] = useState([INITIAL_MESSAGE]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const renderMessage = (text) => {
+    if (!text) return null;
+    const parts = text.split(/(\[[^\]]+\]\([^)]+\))/g);
+    return parts.map((part, index) => {
+      const match = part.match(/\[([^\]]+)\]\(([^)]+)\)/);
+      if (match) {
+        return (
+          <Link 
+            key={index} 
+            to={match[2]} 
+            style={{ color: '#0d6efd', fontWeight: 'bold', textDecoration: 'none' }}
+            onClick={() => setIsOpen(false)} // Đóng chatbot khi bấm vào link
+          >
+            {match[1]}
+          </Link>
+        );
+      }
+      return <span key={index}>{part}</span>;
+    });
+  };
+
   useEffect(() => {
     scrollToBottom();
   }, [messages, isOpen]);
+
+  // Đóng chatbot khi chuyển trang hoặc đăng xuất (cách chuẩn React mới không dùng useEffect)
+  const [prevPath, setPrevPath] = useState(location.pathname);
+  const [prevUser, setPrevUser] = useState(userInfo);
+
+  if (location.pathname !== prevPath || userInfo !== prevUser) {
+    setPrevPath(location.pathname);
+    setPrevUser(userInfo);
+    setIsOpen(false);
+  }
+
+  // Load lịch sử chat khi userInfo thay đổi (đăng nhập / đổi tài khoản / đăng xuất)
+  useEffect(() => {
+    let isMounted = true;
+    const fetchHistory = async () => {
+      if (userInfo?.token) {
+        // Đã đăng nhập → tải lịch sử từ DB
+        try {
+          const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+          const { data } = await axios.get('/api/chatbot/history', config);
+          if (isMounted) {
+            if (data && data.length > 0) {
+              // DB lưu dạng { sender, content } → chuyển sang { sender, text }
+              const converted = data.map(m => ({ sender: m.sender, text: m.content }));
+              setMessages([INITIAL_MESSAGE, ...converted]);
+            } else {
+              setMessages([INITIAL_MESSAGE]);
+            }
+          }
+        } catch (err) {
+          if (isMounted) {
+            console.error('Không tải được lịch sử chat:', err);
+            setMessages([INITIAL_MESSAGE]);
+          }
+        }
+      } else {
+        // Chưa đăng nhập → dùng localStorage
+        try {
+          const saved = localStorage.getItem('chatHistory_guest');
+          if (isMounted) setMessages(saved ? JSON.parse(saved) : [INITIAL_MESSAGE]);
+        } catch {
+          if (isMounted) setMessages([INITIAL_MESSAGE]);
+        }
+      }
+    };
+    fetchHistory();
+    return () => {
+      isMounted = false;
+    };
+  }, [userInfo]);
+
+  // Lưu lịch sử sau khi nhận được reply
+  const persistHistory = useCallback(async (updatedMessages) => {
+    if (userInfo?.token) {
+      // Đăng nhập → lưu lên DB (bỏ tin nhắn chào đầu tiên)
+      try {
+        const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+        const toSave = updatedMessages
+          .filter((_, i) => i > 0) // bỏ tin chào mặc định
+          .map(m => ({ sender: m.sender, content: m.text }));
+        await axios.post('/api/chatbot/save', { messages: toSave }, config);
+      } catch (err) {
+        console.error('Không lưu được lịch sử chat:', err);
+      }
+    } else {
+      // Chưa đăng nhập → lưu localStorage
+      localStorage.setItem('chatHistory_guest', JSON.stringify(updatedMessages));
+    }
+  }, [userInfo]);
 
   const handleSend = async (e, quickText) => {
     if (e) e.preventDefault();
     const text = quickText || input.trim();
     if (!text || loading) return;
 
-    // Thêm tin nhắn user
     const updatedMessages = [...messages, { sender: 'user', text }];
     setMessages(updatedMessages);
     setInput('');
     setLoading(true);
 
     try {
-      // Gửi tin nhắn + lịch sử chat lên backend → Gemini AI
       const { data } = await axios.post('/api/chatbot', {
         message: text,
-        history: updatedMessages.slice(1), // Bỏ tin nhắn chào mừng đầu tiên
+        history: updatedMessages.slice(1),
       });
 
-      setMessages(prev => [...prev, { sender: 'bot', text: data.reply }]);
+      const finalMessages = [...updatedMessages, { sender: 'bot', text: data.reply }];
+      setMessages(finalMessages);
+      await persistHistory(finalMessages);
     } catch {
       setMessages(prev => [...prev, {
         sender: 'bot',
@@ -101,7 +178,7 @@ const Chatbot = () => {
           <Card.Header className="bg-brand-red text-white d-flex justify-content-between align-items-center p-3 border-0">
             <div className="d-flex align-items-center gap-2 fw-bold">
               <FaRobot size={24} /> NDC Trợ lý AI
-              <span className="badge bg-success" style={{ fontSize: '0.6rem' }}>Groq</span>
+              {/* <span className="badge bg-success" style={{ fontSize: '0.6rem' }}>Groq</span> */}
             </div>
             <Button variant="link" className="text-white p-0" onClick={() => setIsOpen(false)}>
               <FaTimes size={20} />
@@ -125,7 +202,7 @@ const Chatbot = () => {
                   className={`p-2 px-3 rounded-3 shadow-sm ${msg.sender === 'user' ? 'bg-danger text-white' : 'bg-white text-dark'}`}
                   style={{ maxWidth: '75%', fontSize: '0.9rem', whiteSpace: 'pre-line' }}
                 >
-                  {msg.text}
+                  {renderMessage(msg.text)}
                 </div>
 
                 {msg.sender === 'user' && (
@@ -136,7 +213,6 @@ const Chatbot = () => {
               </div>
             ))}
 
-            {/* Hiệu ứng "đang gõ..." */}
             {loading && (
               <div className="d-flex mb-3 justify-content-start">
                 <div className="bg-white rounded-circle d-flex justify-content-center align-items-center shadow-sm me-2" style={{ width: '35px', height: '35px', flexShrink: 0 }}>
@@ -193,3 +269,4 @@ const Chatbot = () => {
 };
 
 export default Chatbot;
+

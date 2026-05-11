@@ -24,44 +24,59 @@ const LoginScreen = () => {
   }, [userInfo, navigate]);
 
   const submitHandler = async (e) => {
-    e.preventDefault(); // Ngăn chặn web bị tải lại khi bấm nút
+    e.preventDefault();
+    setError('');
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError('Địa chỉ email không hợp lệ!');
+      return;
+    }
+
+    if (!password) {
+      setError('Vui lòng nhập mật khẩu!');
+      return;
+    }
+
     const result = await login(email, password);
     
     if (!result.success) {
-      setError(result.message); // Nếu đăng nhập sai thì hiện lỗi màu đỏ
+      setError(result.message);
     }
   };
 
   return (
     <Row className="justify-content-md-center align-items-center mt-5">
       <Col xs={12} md={6}>
-        <Card className="shadow-sm border-0 p-4" style={{ borderRadius: '15px' }}>
+        <Card className="shadow-sm border-0 p-4 rounded-4 bg-white">
           <h2 className="text-center text-brand-red fw-bold mb-4">ĐĂNG NHẬP</h2>
           
           {error && <div className="alert alert-danger">{error}</div>}
 
           <Form onSubmit={submitHandler}>
             <Form.Group className="mb-3" controlId="email">
-              <Form.Label>Địa chỉ Email</Form.Label>
+              <Form.Label className="fw-semibold text-muted small text-uppercase">Địa chỉ Email</Form.Label>
               <Form.Control
                 type="email"
                 placeholder="Nhập email của bạn..."
+                className="border-0 bg-light rounded-pill px-4 py-2 shadow-none"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </Form.Group>
 
             <Form.Group className="mb-4" controlId="password">
-              <Form.Label>Mật khẩu</Form.Label>
+              <Form.Label className="fw-semibold text-muted small text-uppercase">Mật khẩu</Form.Label>
               <Form.Control
                 type="password"
                 placeholder="Nhập mật khẩu..."
+                className="border-0 bg-light rounded-pill px-4 py-2 shadow-none"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
             </Form.Group>
 
-            <Button type="submit" variant="danger" className="w-100 buy-btn">
+            <Button type="submit" variant="danger" className="w-100 buy-btn rounded-pill py-2 fw-bold shadow-sm">
               Đăng Nhập
             </Button>
           </Form>

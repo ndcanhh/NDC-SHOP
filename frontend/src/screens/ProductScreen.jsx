@@ -111,7 +111,7 @@ const ProductScreen = () => {
 
   return (
     <>
-      <Link className="btn btn-light my-3 border shadow-sm" to="/">
+      <Link className="btn btn-light my-3 border shadow-sm rounded-pill px-4" to="/">
         Quay lại trang chủ
       </Link>
 
@@ -130,13 +130,14 @@ const ProductScreen = () => {
             src={optimizeCloudinaryUrl(displayImage, 600, 600)} 
             alt={product.name} 
             fluid 
-            className="rounded shadow-sm" 
+            className="rounded-4 shadow-sm bg-white" 
           />
         </Col>
 
         <Col md={4}>
+          <Card className="border-0 shadow-sm rounded-4 overflow-hidden mb-4">
           <ListGroup variant="flush">
-            <ListGroup.Item>
+            <ListGroup.Item className="p-4 border-bottom">
               <h3>{product.name}</h3>
               {product.tags && product.tags.length > 0 && (
                 <div className="mt-2 d-flex flex-wrap gap-2">
@@ -144,7 +145,8 @@ const ProductScreen = () => {
                     <Badge 
                       key={idx} 
                       bg={getBadgeVariant(tag)}
-                      style={getBadgeVariant(tag) === 'purple' ? { backgroundColor: '#6f42c1', fontSize: '14px' } : { fontSize: '14px' }}
+                      className="rounded-pill px-3 py-1 shadow-sm"
+                      style={getBadgeVariant(tag) === 'purple' ? { backgroundColor: '#6f42c1', fontSize: '13px' } : { fontSize: '13px' }}
                     >
                       {tag}
                     </Badge>
@@ -155,7 +157,7 @@ const ProductScreen = () => {
 
             {/* Bộ chọn Màu sắc */}
             {product.colorVariants && product.colorVariants.length > 0 && (
-              <ListGroup.Item>
+              <ListGroup.Item className="p-4 border-bottom">
                 <strong>Màu sắc:</strong>
                 <div className="d-flex flex-wrap gap-2 mt-2">
                   {product.colorVariants.map((cv, idx) => (
@@ -184,15 +186,15 @@ const ProductScreen = () => {
 
             {/* Bộ chọn RAM/ROM */}
             {product.storageVariants && product.storageVariants.length > 0 && (
-              <ListGroup.Item>
+              <ListGroup.Item className="p-4 border-bottom">
                 <strong>Phiên bản:</strong>
                 <div className="d-flex flex-wrap gap-2 mt-2">
                   {product.storageVariants.map((sv, idx) => (
                     <button
                       key={idx}
                       onClick={() => setSelectedStorage(sv)}
-                      className={`btn btn-sm ${selectedStorage?.label === sv.label ? 'btn-danger' : 'btn-outline-secondary'}`}
-                      style={{ borderRadius: '8px', minWidth: '120px', transition: 'all 0.2s ease' }}
+                      className={`btn btn-sm ${selectedStorage?.label === sv.label ? 'btn-danger shadow-sm' : 'btn-outline-secondary'}`}
+                      style={{ borderRadius: '12px', minWidth: '120px', transition: 'all 0.2s ease', padding: '8px 12px' }}
                     >
                       <div className="fw-bold">{sv.label}</div>
                       <small>{sv.price?.toLocaleString('vi-VN')} đ</small>
@@ -202,14 +204,14 @@ const ProductScreen = () => {
               </ListGroup.Item>
             )}
 
-            <ListGroup.Item>
+            <ListGroup.Item className="p-4 border-bottom">
                 <span className="text-brand-red fw-bold fs-3">{displayPrice?.toLocaleString('vi-VN')} đ</span>
             </ListGroup.Item>
-            <ListGroup.Item>
+            <ListGroup.Item className="p-4 border-bottom">
               <strong>Đặc điểm nổi bật:</strong> <br/>
               {product.description}
             </ListGroup.Item>
-            <ListGroup.Item>
+            <ListGroup.Item className="p-4">
                 <strong>Cấu hình chi tiết:</strong>
                 <ul className="mt-2">
                     <li>RAM: {product.specs?.ram}</li>
@@ -219,12 +221,16 @@ const ProductScreen = () => {
                 </ul>
             </ListGroup.Item>
           </ListGroup>
+          </Card>
         </Col>
 
         <Col md={3}>
-          <Card className="shadow-sm border-0">
+          <Card className="shadow-sm border-0 rounded-4 overflow-hidden">
+            <Card.Header className="bg-light border-0 fw-bold py-3 px-4">
+              <h5 className="mb-0 fw-bold">Thông tin giao dịch</h5>
+            </Card.Header>
             <ListGroup variant="flush">
-              <ListGroup.Item>
+              <ListGroup.Item className="p-4">
                 <Row>
                   <Col>Giá:</Col>
                   <Col>
@@ -232,8 +238,7 @@ const ProductScreen = () => {
                   </Col>
                 </Row>
               </ListGroup.Item>
-              
-              <ListGroup.Item>
+              <ListGroup.Item className="p-4">
                 <Row>
                   <Col>Trạng thái:</Col>
                   <Col>
@@ -248,28 +253,27 @@ const ProductScreen = () => {
                 </Row>
               </ListGroup.Item>
               
-              <ListGroup.Item>
+              <ListGroup.Item className="p-4 pt-0 border-0">
                 {displayStock === 0 ? (
-                  <Button variant="secondary" className="w-100 py-2 fs-5 fw-bold" disabled>
+                  <Button variant="secondary" className="w-100 py-3 fs-5 fw-bold rounded-pill shadow-sm" disabled>
                     Hết hàng
                   </Button>
                 ) : (
-                  <div className="d-flex gap-2">
+                  <div className="d-flex flex-column gap-2">
                     <Button 
                       variant="danger" 
-                      className="buy-btn flex-grow-1 m-0 py-2" 
+                      className="buy-btn w-100 m-0 py-3 rounded-pill fw-bold shadow-sm" 
                       onClick={handleBuyNow} 
                     >
                       MUA NGAY
                     </Button>
                     <Button 
                       variant="outline-danger" 
-                      className="flex-shrink-0" 
-                      style={{ width: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px' }}
+                      className="w-100 m-0 py-2 rounded-pill fw-bold bg-white" 
                       onClick={handleAddToCart} 
                       title="Thêm vào giỏ hàng"
                     >
-                      <FaCartPlus size={20} />
+                      <FaCartPlus size={18} className="me-2" /> Thêm vào giỏ hàng
                     </Button>
                   </div>
                 )}

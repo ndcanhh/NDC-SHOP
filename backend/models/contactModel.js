@@ -1,27 +1,26 @@
 const mongoose = require('mongoose');
 
-// Quyển sổ lưu lại các tin nhắn liên hệ từ khách hàng
 const contactSchema = mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true // Người dùng phải đăng nhập mới gửi được
+        required: true
     },
     name: {
         type: String,
-        required: true // Tên người gửi
+        required: true
     },
     email: {
         type: String,
-        required: true // Email để phản hồi
+        required: true
     },
     message: {
         type: String,
-        required: true // Nội dung tin nhắn
+        required: true
     },
     isRead: {
         type: Boolean,
-        default: false // Admin đã đọc chưa
+        default: false
     }
 }, {
     timestamps: true
