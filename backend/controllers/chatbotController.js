@@ -11,11 +11,20 @@ const SYSTEM_PROMPT = `Bạn là trợ lý ảo AI chính thức và chuyên ngh
 
 QUY TẮC CỐT LÕI (NGHIÊM CẤM VI PHẠM):
 
-Phạm vi trả lời: Bạn CHỈ ĐƯỢC PHÉP trả lời các câu hỏi thuộc các chủ đề sau:
+1. Phạm vi trả lời: Bạn CHỈ ĐƯỢC PHÉP trả lời các câu hỏi thuộc các chủ đề sau:
 - Thông tin về NDC Shop (địa chỉ: 70 ngõ 176 Trương Định, Hai Bà Trưng, Hà Nội, hotline: 0973 521 509, email: ndcshop@gmail.com, giờ mở cửa: 8:00 – 22:00, chính sách bảo hành, đổi trả, khuyến mãi...).
 - Các sản phẩm điện thoại đang có mặt tại cửa hàng.
 - Thông số kỹ thuật chi tiết của các dòng máy.
 - Kiến thức về công nghệ điện thoại di động (ví dụ: so sánh chip, công nghệ màn hình, camera...).
+2. Tuyệt đối KHÔNG trả lời về ĐƠN HÀNG: 
+- Nếu khách hỏi về trạng thái đơn hàng, hủy đơn, hoặc kiểm tra mã đơn hàng, hãy trả lời lịch sự: "Dạ em xin lỗi, em chưa có quyền truy cập vào hệ thống quản lý đơn hàng. Anh/Chị vui lòng liên hệ Hotline 0973 521 509 hoặc nhắn tin trực tiếp cho Fanpage để được nhân viên hỗ trợ kiểm tra chính xác nhất nhé!"
+- TUYỆT ĐỐI KHÔNG tự bịa ra thông tin đơn hàng hay trạng thái đơn hàng.
+
+3. Tư vấn SẢN PHẨM & TỒN KHO:
+- Khi khách hỏi về một sản phẩm, bạn phải liệt kê ĐẦY ĐỦ các phiên bản (màu sắc, bộ nhớ) và tình trạng CÒN HÀNG/HẾT HÀNG dựa trên danh sách dữ liệu thực tế được cung cấp bên dưới.
+- TUYỆT ĐỐI KHÔNG được tiết lộ số lượng cụ thể (ví dụ: không được nói "còn 5 máy"). Chỉ được nói là "Còn hàng" hoặc "Hết hàng".
+- Nếu khách hỏi chung chung, hãy liệt kê các bản phổ biến nhất.
+- BẮT BUỘC dùng định dạng link Markdown [Tên sản phẩm - Phiên bản](/product/ID) để khách bấm vào.
 
 Từ chối câu hỏi ngoài lề: Tuyệt đối KHÔNG trả lời bất kỳ câu hỏi nào nằm ngoài phạm vi trên (y tế, tình cảm, lập trình, kiến thức chung không liên quan đến điện thoại, v.v.). Khi từ chối, phải trả lời lịch sự và hướng khách hàng quay lại chủ đề sản phẩm/dịch vụ của NDC Shop.
 
@@ -37,7 +46,14 @@ Trợ lý ảo: Xin lỗi Anh/Chị, em chỉ có thể hỗ trợ thông tin v�
 Khách hàng: erd là gì
 Trợ lý ảo: Dạ em rất tiếc, nhưng em chỉ có thể hỗ trợ thông tin về sản phẩm, dịch vụ và chính sách của NDC Shop. Nếu Anh/Chị cần tư vấn về các nội dung này, em sẵn sàng giúp đỡ ạ.
 
-KHI NHẮC ĐẾN TÊN SẢN PHẨM trong câu trả lời, BẮT BUỘC PHẢI DÙNG định dạng link Markdown [Tên sản phẩm](/product/ID) giống y hệt như được cung cấp trong danh sách để khách hàng có thể bấm vào.`;
+KHI NHẮC ĐẾN TÊN SẢN PHẨM trong câu trả lời, BẮT BUỘC PHẢI DÙNG định dạng link Markdown [Tên sản phẩm](/product/ID) giống y hệt như được cung cấp trong danh sách để khách hàng có thể bấm vào.
+
+VÍ DỤ TỪ CHỐI ĐƠN HÀNG:
+Khách hàng: kiểm tra đơn hàng #12345
+Trợ lý ảo: Dạ em xin lỗi, em chưa có quyền truy cập vào hệ thống quản lý đơn hàng. Anh/Chị vui lòng liên hệ Hotline 0973 521 509 hoặc nhắn tin trực tiếp cho Fanpage để được nhân viên hỗ trợ kiểm tra chính xác nhất nhé!
+
+Khách hàng: đơn hàng của tôi bao giờ giao?
+Trợ lý ảo: Dạ em xin lỗi Anh/Chị, hiện tại em không thể kiểm tra thông tin vận chuyển hay trạng thái đơn hàng cụ thể. Anh/Chị vui lòng gọi Hotline 0973 521 509 để nhân viên check thông tin và báo ngay cho mình nhé!`;
 
 // @desc    Chat với AI (Groq - Llama)
 // @route   POST /api/chatbot
@@ -127,33 +143,36 @@ CHỈ trả về JSON, không giải thích.`;
                         $and: keywords.map(kw => ({
                             name: { $regex: kw, $options: 'i' }
                         }))
-                    }).limit(10).select('name price storageVariants discount specs.ram specs.rom');
+                    }).limit(10).select('name price variants discount specs.ram specs.rom');
                 }
             }
 
             if (products.length > 0) {
-                // Tìm thấy máy cụ thể → hiển thị thông tin chi tiết
-                let productListText = "\n\n--- THÔNG TIN SẢN PHẨM ---\n";
-                products.forEach((p, index) => {
-                    const finalPrice = p.price - (p.price * (p.discount || 0) / 100);
-                    const totalStock = p.storageVariants ? p.storageVariants.reduce((sum, v) => sum + (v.countInStock || 0), 0) : 0;
-                    const status = totalStock > 0 ? "Còn hàng" : "Hết hàng";
-                    const specs = (p.specs?.ram || '') + (p.specs?.rom ? '/' + p.specs.rom : '');
-                    productListText += `${index + 1}. [${p.name} ${specs ? `(${specs})` : ''}](/product/${p._id}) - Giá: ${finalPrice.toLocaleString('vi-VN')} VND - ${status}\n`;
+                // Tìm thấy máy cụ thể → hiển thị thông tin chi tiết từng phiên bản
+                let productListText = "\n\n--- THÔNG TIN CHI TIẾT SẢN PHẨM (Hãy liệt kê đủ bản cho khách) ---\n";
+                products.forEach((p) => {
+                    productListText += `Sản phẩm: [${p.name}](/product/${p._id})\nCác phiên bản:\n`;
+                    if (p.variants && p.variants.length > 0) {
+                        p.variants.forEach(v => {
+                            const status = v.countInStock > 0 ? "Còn hàng" : "Hết hàng";
+                            productListText += `- Bản ${v.ram}/${v.rom}, màu ${v.color}: Giá ${v.price.toLocaleString('vi-VN')} VND — ${status}\n`;
+                        });
+                    } else {
+                        const status = p.countInStock > 0 ? "Còn hàng" : "Hết hàng";
+                        productListText += `- Giá mặc định: ${p.price.toLocaleString('vi-VN')} VND — ${status}\n`;
+                    }
+                    productListText += "\n";
                 });
                 dynamicSystemPrompt += productListText;
             } else {
                 // Không tìm thấy máy cụ thể → fallback: hiển toàn bộ danh sách để tư vấn
                 console.log(`[RAG] Không tìm thấy "${search_query}" → fallback sang tư vấn toàn bộ danh sách`);
-                const allProducts = await Product.find().sort({ price: 1 }).limit(20)
-                    .select('name price discount specs.ram specs.rom storageVariants');
-                let fallbackText = `\n\n--- NDC Shop hiện không có máy tên "${search_query}". Dưới đây là các máy hiện có tại shop (hãy gợi ý máy tương đương) ---\n`;
+                const allProducts = await Product.find().sort({ price: 1 }).limit(20).select('name price variants countInStock');
+                let fallbackText = `\n\n--- NDC Shop hiện không có máy tên "${search_query}". Dưới đây là các máy khác (hãy gợi ý máy tương đương) ---\n`;
                 allProducts.forEach((p, i) => {
-                    const fp = p.price - (p.price * (p.discount || 0) / 100);
-                    const stock = p.storageVariants?.reduce((s, v) => s + (v.countInStock || 0), 0) || 0;
+                    const stock = p.variants?.reduce((s, v) => s + (v.countInStock || 0), 0) || p.countInStock || 0;
                     if (stock > 0) {
-                        const specs = (p.specs?.ram || '') + (p.specs?.rom ? '/' + p.specs.rom : '');
-                        fallbackText += `${i + 1}. [${p.name} ${specs ? `(${specs})` : ''}](/product/${p._id}) — ${fp.toLocaleString('vi-VN')} VND\n`;
+                        fallbackText += `${i + 1}. [${p.name}](/product/${p._id}) — Giá từ ${p.price.toLocaleString('vi-VN')} VND\n`;
                     }
                 });
                 dynamicSystemPrompt += fallbackText;
@@ -174,31 +193,36 @@ CHỈ trả về JSON, không giải thích.`;
 
             let query = {};
             if (budget) {
-                // Nếu có budget, query các máy trong khoảng budget ± 30%
+                // query các máy trong khoảng budget ± 30%
                 const minPrice = budget * 0.7;
                 const maxPrice = budget * 1.3;
                 query = { price: { $gte: minPrice, $lte: maxPrice } };
                 console.log(`[ADVICE] Lọc theo ngân sách: ~${budget.toLocaleString('vi-VN')} VND`);
             }
 
-            // Lấy tất cả sản phẩm còn hàng (giới hạn 40 để cover rộng hơn)
+            // Lấy tất cả sản phẩm còn hàng
             const allProducts = await Product.find(query)
                 .sort({ price: 1 })
-                .limit(40)
-                .select('name price discount specs.ram specs.rom storageVariants category');
+                .limit(10)
+                .select('name price discount specs.ram specs.rom variants category countInStock');
 
-            let productListText = "\n\n--- DANH SÁCH SẢN PHẨM HIỆN CÓ TẠI NDC SHOP (để tư vấn) ---\n";
+            let productListText = "\n\n--- DANH SÁCH SẢN PHẨM GỢI Ý (kèm chi tiết phiên bản) ---\n";
             allProducts.forEach((p, i) => {
-                const finalPrice = p.price - (p.price * (p.discount || 0) / 100);
-                const totalStock = p.storageVariants
-                    ? p.storageVariants.reduce((sum, v) => sum + (v.countInStock || 0), 0)
-                    : 0;
-                if (totalStock > 0) { // Chỉ liệt kê sản phẩm còn hàng
-                    const specs = (p.specs?.ram || '') + (p.specs?.rom ? '/' + p.specs.rom : '');
-                    productListText += `${i + 1}. [${p.name} ${specs ? `(${specs})` : ''}](/product/${p._id}) — ${finalPrice.toLocaleString('vi-VN')} VND\n`;
+                const totalStock = p.variants ? p.variants.reduce((sum, v) => sum + (v.countInStock || 0), 0) : (p.countInStock || 0);
+                if (totalStock > 0) {
+                    productListText += `${i + 1}. [${p.name}](/product/${p._id})\n`;
+                    if (p.variants && p.variants.length > 0) {
+                        p.variants.forEach(v => {
+                            if (v.countInStock > 0) {
+                                productListText += `   - Bản ${v.ram}/${v.rom}, màu ${v.color}: ${v.price.toLocaleString('vi-VN')} VND\n`;
+                            }
+                        });
+                    } else {
+                        productListText += `   - Giá: ${p.price.toLocaleString('vi-VN')} VND\n`;
+                    }
                 }
             });
-            productListText += "---\nLƯU Ý QUAN TRỌNG: Hãy đọc kỹ các tin nhắn trước đó (ngữ cảnh cuộc trò chuyện). Nếu khách hàng đang hỏi tiếp hoặc so sánh các sản phẩm ĐÃ thảo luận, hãy TẬP TRUNG trả lời về các sản phẩm đó. CHỈ gợi ý sản phẩm mới từ danh sách nếu khách hỏi chung chung. TUYỆT ĐỐI không đề xuất sản phẩm ngoài danh sách. BẮT BUỘC giữ nguyên định dạng link [Tên SP](/product/ID).";
+            productListText += "---\nLƯU Ý: Tuyệt đối không tự bịa thông tin đơn hàng. Khi khách hỏi về máy, hãy liệt kê các phiên bản màu sắc và bộ nhớ dựa trên dữ liệu trên để khách dễ chọn.";
 
             dynamicSystemPrompt += productListText;
             selectedModel = 'llama-3.3-70b-versatile';

@@ -76,7 +76,7 @@ const Header = () => {
         <Container className="d-flex justify-content-between align-items-center px-5">
           
           <div className="fw-bold d-flex align-items-center gap-1 marquee-container" style={{ flex: 1, marginRight: '20px' }}>
-            <FaFire className="text-warning" />
+            {/* <FaFire className="text-warning" /> */}
             <div className="marquee-track">
               <span className="marquee-text">
                 Siêu Sales Tháng 3 - Giảm giá điện thoại đến 50% | Miễn phí giao hàng toàn quốc | Trả góp 0% lãi suất | Tặng phụ kiện chính hãng khi mua Online | Bảo hành 24 tháng&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
