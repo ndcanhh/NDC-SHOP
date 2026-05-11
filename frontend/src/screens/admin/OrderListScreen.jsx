@@ -103,11 +103,11 @@ const OrderListScreen = () => {
           <Table hover responsive className="mb-0 align-middle">
             <thead className="bg-light">
               <tr className="text-muted small text-uppercase fw-bold">
-                <th className="ps-4 py-3">Mã đơn hàng</th>
-                <th className="py-3">Khách hàng</th>
+                <th className="ps-4 py-3">Mã đơn</th>
+                <th className="py-3 d-none d-md-table-cell">Khách hàng</th>
                 <th className="py-3">Tổng tiền</th>
                 <th className="py-3 text-center">Trạng thái</th>
-                <th className="py-3 text-center">Ngày đặt</th>
+                <th className="py-3 text-center d-none d-lg-table-cell">Ngày đặt</th>
                 <th className="py-3 text-end pe-4">Hành động</th>
               </tr>
             </thead>
@@ -116,27 +116,38 @@ const OrderListScreen = () => {
                 <tr key={order._id}>
                   <td className="ps-4">
                     <span className="fw-bold text-dark">#{order._id.substring(order._id.length - 8).toUpperCase()}</span>
+                    <div className="d-md-none text-muted smaller" style={{ fontSize: '0.7rem' }}>
+                      {order.user ? order.user.name : 'Khách vãng lai'}
+                    </div>
                   </td>
-                  <td>
-                    <div className="fw-medium">{order.user ? order.user.name : <span className="text-muted fst-italic">Khách vãng lai</span>}</div>
+                  <td className="d-none d-md-table-cell">
+                    <div className="fw-medium text-truncate" style={{ maxWidth: '120px' }}>
+                      {order.user ? order.user.name : <span className="text-muted fst-italic">Khách vãng lai</span>}
+                    </div>
                   </td>
                   <td className="text-danger fw-bold">{order.totalPrice.toLocaleString('vi-VN')} đ</td>
                   <td className="text-center">
-                    <Badge pill bg="light" className={`border px-3 ${
+                    <Badge pill bg="light" className={`border px-2 px-md-3 ${
                       order.status === 'Đã giao thành công' ? 'text-success border-success-subtle' :
                       order.status === 'Đã chuyển cho đơn vị vận chuyển' ? 'text-info border-info-subtle' :
                       order.status === 'Đã hủy' ? 'text-danger border-danger-subtle' : 'text-secondary border-secondary-subtle'
-                    }`}>
-                      {order.status}
+                    }`} style={{ fontSize: '0.7rem' }}>
+                      <span className="d-none d-md-inline">{order.status}</span>
+                      <span className="d-md-none">
+                        {order.status === 'Chờ xử lý' ? 'Chờ XL' :
+                         order.status === 'Đã chuyển cho đơn vị vận chuyển' ? 'Đã giao ĐVVC' :
+                         order.status === 'Đã giao thành công' ? 'Thành công' :
+                         order.status === 'Đã hủy' ? 'Đã hủy' : order.status}
+                      </span>
                     </Badge>
                   </td>
-                  <td className="text-center text-muted small">{new Date(order.createdAt).toLocaleDateString('vi-VN')}</td>
+                  <td className="text-center text-muted small d-none d-lg-table-cell">{new Date(order.createdAt).toLocaleDateString('vi-VN')}</td>
                   <td className="text-end pe-4">
-                    <div className="d-flex justify-content-end gap-2">
-                      <Button variant="outline-primary" className="btn-sm border-0 bg-light rounded-3" onClick={() => handleShowModal(order)} title="Xem chi tiết">
+                    <div className="d-flex justify-content-end gap-1 gap-md-2">
+                      <Button variant="outline-primary" className="btn-sm border-0 bg-light rounded-3 p-2" onClick={() => handleShowModal(order)} title="Xem chi tiết">
                         <FaEye />
                       </Button>
-                      <Button variant="outline-danger" className="btn-sm border-0 bg-light rounded-3" onClick={() => deleteOrderHandler(order._id)} title="Xóa đơn hàng">
+                      <Button variant="outline-danger" className="btn-sm border-0 bg-light rounded-3 p-2" onClick={() => deleteOrderHandler(order._id)} title="Xóa đơn hàng">
                         <FaTrash />
                       </Button>
                     </div>

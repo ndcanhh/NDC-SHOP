@@ -65,6 +65,7 @@ const Header = () => {
   const logoutHandler = () => {
     if (window.confirm('Bạn có chắc chắn muốn đăng xuất không?')) {
       logout();
+      navigate('/');
     }
   };
 

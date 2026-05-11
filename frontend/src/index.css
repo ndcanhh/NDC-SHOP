@@ -322,6 +322,15 @@ body {
   font-size: 0.85rem;
 }
 
+@media (max-width: 576px) {
+  .price-current {
+    font-size: 0.95rem !important;
+  }
+  .product-card {
+    padding: 10px !important;
+  }
+}
+
 /* Label nhỏ góc trên */
 .discount-badge {
   position: absolute;
@@ -338,15 +347,38 @@ body {
 .buy-btn {
   background-color: #d70018;
   border: none;
-  width: 100%;
+  color: white !important;
   font-weight: 600;
   border-radius: 8px;
-  padding: 8px 0;
-  transition: background-color 0.2s;
+  padding: 8px 16px;
+  transition: all 0.2s;
 }
 
 .buy-btn:hover {
   background-color: #b00010;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(215, 0, 24, 0.3);
+}
+
+@media (max-width: 576px) {
+  .buy-btn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+}
+
+.btn-add-to-cart {
+  background-color: white;
+  color: #d70018;
+  border: 2px solid #d70018;
+  transition: all 0.3s ease;
+}
+
+.btn-add-to-cart:hover {
+  background-color: #d70018;
+  color: white !important;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(215, 0, 24, 0.2);
 }
 
 /* BANNER */
@@ -413,6 +445,49 @@ body {
   background: #d70018;
   color: #fff;
   transform: scale(1.1);
+}
+
+/* Giỏ hàng trống */
+.empty-cart-card {
+  background: var(--bg-white);
+  border: 1px solid rgba(0,0,0,0.05) !important;
+  transition: transform 0.3s ease;
+}
+
+.empty-cart-card:hover {
+  transform: translateY(-5px);
+}
+
+.empty-cart-icon-wrapper {
+  width: 150px;
+  height: 150px;
+  background: #f8f9fa;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.empty-cart-icon-wrapper:after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(215, 0, 24, 0.05) 0%, transparent 70%);
+  animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+  0% { transform: scale(0.95); opacity: 0.5; }
+  50% { transform: scale(1.05); opacity: 0.8; }
+  100% { transform: scale(0.95); opacity: 0.5; }
+}
+
+.empty-cart-card h3 {
+  color: #1d1d1f;
+  letter-spacing: -0.5px;
 }
 
 /* Trang profile tabs */
@@ -577,9 +652,79 @@ h1, h2, h3, h4, h5, h6 {
 @media (max-width: 991px) {
   .admin-sidebar {
     position: fixed;
-    left: -260px;
+    left: -280px; /* Khớp với sidebar-width */
+    top: 0;
+    bottom: 0;
+    height: 100vh;
   }
   .admin-sidebar.show {
     left: 0;
+  }
+  
+  .admin-mobile-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 55px;
+    height: 55px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    z-index: 1050;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .admin-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 1035;
+  }
+
+  /* Responsive tables in Admin */
+  .table-responsive {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+  }
+  
+  .admin-content-area {
+    width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  /* Tránh Row của Bootstrap làm tràn màn hình trên mobile */
+  .admin-content-area .row {
+    margin-right: 0;
+    margin-left: 0;
+  }
+  
+  .admin-content-area .col, 
+  .admin-content-area [class*="col-"] {
+    padding-right: 5px;
+    padding-left: 5px;
+  }
+
+  /* Đảm bảo bảng luôn cuộn trong khung */
+  .table-responsive {
+    margin-bottom: 0;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .table td, .table th {
+    padding: 8px 4px !important;
+    font-size: 0.75rem;
   }
 }

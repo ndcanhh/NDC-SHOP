@@ -60,9 +60,9 @@ const UserListScreen = () => {
           <Table hover responsive className="mb-0 align-middle">
             <thead className="bg-light">
               <tr className="text-muted small text-uppercase fw-bold">
-                <th className="ps-4 py-3">Mã khách hàng</th>
+                <th className="ps-4 py-3 d-none d-lg-table-cell">Mã khách hàng</th>
                 <th className="py-3">Thông tin khách hàng</th>
-                <th className="py-3">Email</th>
+                <th className="py-3 d-none d-md-table-cell">Email</th>
                 <th className="py-3 text-center">Vai trò</th>
                 <th className="py-3 text-end pe-4">Hành động</th>
               </tr>
@@ -70,32 +70,35 @@ const UserListScreen = () => {
             <tbody>
               {users.map((user) => (
                 <tr key={user._id}>
-                  <td className="ps-4">
+                  <td className="ps-4 d-none d-lg-table-cell">
                     <span className="fw-bold text-dark">#{user._id.substring(user._id.length - 8).toUpperCase()}</span>
                   </td>
                   <td>
-                    <div className="d-flex align-items-center gap-3">
-                      <div className="bg-secondary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center text-secondary" style={{ width: '40px', height: '40px' }}>
+                    <div className="d-flex align-items-center gap-2 gap-md-3">
+                      <div className="bg-secondary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center text-secondary d-none d-sm-flex" style={{ width: '40px', height: '40px', flexShrink: 0 }}>
                         {user.isAdmin ? <FaUserShield size={18} /> : <FaUser size={18} />}
                       </div>
-                      <span className="fw-medium text-dark">{user.name}</span>
+                      <div>
+                        <div className="fw-bold text-dark text-truncate" style={{ maxWidth: '120px' }}>{user.name}</div>
+                        <div className="d-md-none text-muted smaller" style={{ fontSize: '0.75rem' }}>{user.email}</div>
+                      </div>
                     </div>
                   </td>
-                  <td>
+                  <td className="d-none d-md-table-cell">
                     <a href={`mailto:${user.email}`} className="text-decoration-none text-muted">{user.email}</a>
                   </td>
                   <td className="text-center">
                     {user.isAdmin ? (
-                      <Badge bg="danger" className="px-3 rounded-pill">Admin</Badge>
+                      <Badge bg="danger" className="px-2 px-md-3 rounded-pill" style={{ fontSize: '0.7rem' }}>Admin</Badge>
                     ) : (
-                      <Badge bg="light" text="dark" className="border px-3 rounded-pill text-secondary">Khách hàng</Badge>
+                      <Badge bg="light" text="dark" className="border px-2 px-md-3 rounded-pill text-secondary" style={{ fontSize: '0.7rem' }}>Khách</Badge>
                     )}
                   </td>
                   <td className="text-end pe-4">
                     {!user.isAdmin && (
                       <Button
                         variant="outline-danger"
-                        className="btn-sm border-0 bg-light rounded-3"
+                        className="btn-sm border-0 bg-light rounded-3 p-2"
                         onClick={() => deleteHandler(user._id)}
                         title="Xóa khách hàng"
                       >

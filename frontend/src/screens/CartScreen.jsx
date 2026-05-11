@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Row, Col, ListGroup, Image, Card, Button } from 'react-bootstrap';
-import { FaTrash, FaMinus, FaPlus } from 'react-icons/fa';
+import { FaTrash, FaMinus, FaPlus, FaShoppingCart } from 'react-icons/fa';
 import { CartContext } from '../context/cartContextDef';
 import { AuthContext } from '../context/authContextValue';
 import { optimizeCloudinaryUrl } from '../utils/imageUtils';
@@ -36,9 +36,21 @@ const CartScreen = () => {
         
         {/* Kiểm tra giỏ hàng có trống không */}
         {cartItems.length === 0 ? (
-          <div className="alert alert-info border-0 shadow-sm rounded-4" style={{ backgroundColor: '#e9ecef', color: '#555' }}>
-            Giỏ hàng của bạn đang trống! <Link to="/" className="fw-bold text-brand-red">Đi mua sắm ngay</Link>
-          </div>
+          <Card className="border-0 shadow-sm rounded-4 text-center py-5 px-4 empty-cart-card">
+            <div className="empty-cart-icon-wrapper mb-4 mx-auto">
+              <FaShoppingCart size={80} className="text-muted opacity-25" />
+            </div>
+            <h3 className="fw-bold mb-2">Giỏ hàng của bạn đang trống!</h3>
+            <p className="text-muted mb-4">
+              Có vẻ như bạn chưa thêm sản phẩm nào vào giỏ hàng.<br />
+              Hãy khám phá hàng ngàn sản phẩm công nghệ hấp dẫn ngay nhé!
+            </p>
+            <Link to="/">
+              <Button className="buy-btn rounded-pill px-5 py-2 fw-bold shadow-sm">
+                ĐI MUA SẮM NGAY
+              </Button>
+            </Link>
+          </Card>
         ) : (
           <Card className="border-0 shadow-sm rounded-4 overflow-hidden">
           <ListGroup variant="flush">

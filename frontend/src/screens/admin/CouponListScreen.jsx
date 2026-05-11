@@ -146,11 +146,11 @@ const CouponListScreen = () => {
             <thead className="bg-light">
               <tr className="text-muted small text-uppercase fw-bold">
                 <th className="ps-4 py-3">Mã giảm giá</th>
-                <th className="py-3">Loại</th>
+                <th className="py-3 d-none d-md-table-cell">Loại</th>
                 <th className="py-3">Giá trị giảm</th>
-                <th className="py-3">Đơn tối thiểu</th>
-                <th className="py-3 text-center">Đã dùng</th>
-                <th className="py-3 text-center">Hạn sử dụng</th>
+                <th className="py-3 d-none d-lg-table-cell">Đơn tối thiểu</th>
+                <th className="py-3 text-center d-none d-md-table-cell">Đã dùng</th>
+                <th className="py-3 text-center d-none d-lg-table-cell">Hạn sử dụng</th>
                 <th className="py-3 text-center">Trạng thái</th>
                 <th className="py-3 text-end pe-4">Hành động</th>
               </tr>
@@ -161,40 +161,46 @@ const CouponListScreen = () => {
               ) : coupons.map((c) => (
                 <tr key={c._id}>
                   <td className="ps-4">
-                    <span className="badge bg-dark fs-6 px-3 py-2" style={{ letterSpacing: '1px' }}>
+                    <div className="badge bg-dark fs-6 px-2 py-1 mb-1" style={{ letterSpacing: '1px' }}>
                       {c.code}
-                    </span>
+                    </div>
+                    <div className="d-md-none text-muted smaller" style={{ fontSize: '0.7rem' }}>
+                      Hạn: {new Date(c.expirationDate).toLocaleDateString('vi-VN')}
+                    </div>
                   </td>
-                  <td>
+                  <td className="d-none d-md-table-cell">
                     {c.discountType === 'percentage'
-                      ? <Badge pill bg="info" className="text-dark px-3">Phần trăm (%)</Badge>
-                      : <Badge pill bg="primary" className="px-3">Tiền mặt (đ)</Badge>}
+                      ? <Badge pill bg="info" className="text-dark px-2">Phần trăm</Badge>
+                      : <Badge pill bg="primary" className="px-2">Tiền mặt</Badge>}
                   </td>
                   <td className="fw-bold text-danger">
                     {c.discountType === 'percentage'
                       ? `${c.discountValue}%`
-                      : `${c.discountValue.toLocaleString('vi-VN')} đ`}
+                      : `${c.discountValue.toLocaleString('vi-VN')}đ`}
+                    <div className="d-lg-none text-muted smaller fw-normal" style={{ fontSize: '0.7rem' }}>
+                      Đơn ≥ {c.minOrderValue.toLocaleString('vi-VN')}đ
+                    </div>
                   </td>
-                  <td>{c.minOrderValue.toLocaleString('vi-VN')} đ</td>
-                  <td className="text-center">
+                  <td className="d-none d-lg-table-cell">{c.minOrderValue.toLocaleString('vi-VN')} đ</td>
+                  <td className="text-center d-none d-md-table-cell">
                     <span className={c.usedCount >= c.usageLimit ? 'text-danger fw-bold' : 'text-muted fw-medium'}>
-                      {c.usedCount} / {c.usageLimit}
+                      {c.usedCount}/{c.usageLimit}
                     </span>
                   </td>
-                  <td className={`text-center ${isExpired(c.expirationDate) ? 'text-danger fw-bold' : 'text-muted'}`}>
+                  <td className={`text-center d-none d-lg-table-cell ${isExpired(c.expirationDate) ? 'text-danger fw-bold' : 'text-muted'}`}>
                     {new Date(c.expirationDate).toLocaleDateString('vi-VN')}
                   </td>
                   <td className="text-center" onClick={() => handleToggle(c)} style={{ cursor: 'pointer' }} title="Click để Bật/Tắt mã">
-                    {getStatus(c)}
+                    <div style={{ transform: 'scale(0.9)' }}>{getStatus(c)}</div>
                   </td>
                   <td className="text-end pe-4">
                     <Button
                       variant="outline-danger"
-                      className="btn-sm border-0 bg-light rounded-3"
+                      className="btn-sm border-0 bg-light rounded-3 p-2"
                       onClick={() => handleDelete(c._id, c.code)}
                       title="Xóa mã giảm giá"
                     >
-                      <FaTrash />
+                      <FaTrash size={14} />
                     </Button>
                   </td>
                 </tr>

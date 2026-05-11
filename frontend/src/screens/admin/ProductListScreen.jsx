@@ -217,9 +217,9 @@ const ProductListScreen = () => {
               <tr className="text-muted small text-uppercase fw-bold">
                 <th className="ps-4 py-3">Hình ảnh</th>
                 <th className="py-3">Tên sản phẩm</th>
-                <th className="py-3">Giá gốc</th>
-                <th className="py-3 text-center">Tồn kho</th>
-                <th className="py-3 text-center">Trạng thái</th>
+                <th className="py-3 d-none d-md-table-cell">Giá gốc</th>
+                <th className="py-3 text-center d-none d-lg-table-cell">Tồn kho</th>
+                <th className="py-3 text-center d-none d-md-table-cell">Trạng thái</th>
                 <th className="py-3 text-end pe-4">Hành động</th>
               </tr>
             </thead>
@@ -235,11 +235,12 @@ const ProductListScreen = () => {
                     />
                   </td>
                   <td>
-                    <div className="fw-bold text-dark">{p.name}</div>
+                    <div className="fw-bold text-dark text-truncate" style={{ maxWidth: '150px' }}>{p.name}</div>
+                    <div className="d-md-none text-danger small fw-bold">{p.price.toLocaleString('vi-VN')} đ</div>
                   </td>
-                  <td className="text-danger fw-bold">{p.price.toLocaleString('vi-VN')} đ</td>
-                  <td className="text-center fw-medium">{p.storageVariants ? p.storageVariants.reduce((sum, v) => sum + (v.countInStock || 0), 0) : 0}</td>
-                  <td className="text-center">
+                  <td className="text-danger fw-bold d-none d-md-table-cell">{p.price.toLocaleString('vi-VN')} đ</td>
+                  <td className="text-center fw-medium d-none d-lg-table-cell">{p.storageVariants ? p.storageVariants.reduce((sum, v) => sum + (v.countInStock || 0), 0) : 0}</td>
+                  <td className="text-center d-none d-md-table-cell">
                     {p.isHidden ? (
                       <span className="badge rounded-pill bg-light text-danger border border-danger-subtle px-3">Đã ẩn</span>
                     ) : (
@@ -247,19 +248,19 @@ const ProductListScreen = () => {
                     )}
                   </td>
                   <td className="text-end pe-4">
-                    <div className="d-flex justify-content-end gap-2">
-                      <Button variant="outline-primary" className="btn-sm border-0 bg-light rounded-3" onClick={() => handleShowModal(p)} title="Sửa">
+                    <div className="d-flex justify-content-end gap-1 gap-md-2">
+                      <Button variant="outline-primary" className="btn-sm border-0 bg-light rounded-3 p-2" onClick={() => handleShowModal(p)} title="Sửa">
                         <FaEdit />
                       </Button>
                       <Button 
                         variant={p.isHidden ? "outline-success" : "outline-warning"} 
-                        className="btn-sm border-0 bg-light rounded-3" 
+                        className="btn-sm border-0 bg-light rounded-3 p-2 d-none d-sm-inline-block" 
                         onClick={() => toggleHideHandler(p)}
                         title={p.isHidden ? 'Hiện' : 'Ẩn'}
                       >
                         {p.isHidden ? <FaEye /> : <FaEyeSlash />}
                       </Button>
-                      <Button variant="outline-danger" className="btn-sm border-0 bg-light rounded-3" onClick={() => deleteHandler(p._id)} title="Xóa">
+                      <Button variant="outline-danger" className="btn-sm border-0 bg-light rounded-3 p-2" onClick={() => deleteHandler(p._id)} title="Xóa">
                         <FaTrash />
                       </Button>
                     </div>

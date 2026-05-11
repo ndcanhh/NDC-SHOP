@@ -14,7 +14,7 @@ import {
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/authContextValue';
 
-const AdminSidebar = () => {
+const AdminSidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout } = useContext(AuthContext);
@@ -22,6 +22,7 @@ const AdminSidebar = () => {
   const logoutHandler = () => {
     logout();
     navigate('/');
+    if (onClose) onClose();
   };
 
   const menuItems = [
@@ -34,7 +35,7 @@ const AdminSidebar = () => {
   ];
 
   return (
-    <aside className="admin-sidebar shadow d-flex flex-column" aria-label="Thanh điều hướng quản trị">
+    <aside className={`admin-sidebar shadow d-flex flex-column ${isOpen ? 'show' : ''}`} aria-label="Thanh điều hướng quản trị">
       <div className="sidebar-header p-4 text-center">
         <div onClick={() => window.location.reload()} style={{ cursor: 'pointer' }}>
           <h4 className="fw-bold text-white mb-0" style={{ textWrap: 'balance' }}>NDC SHOP</h4>
@@ -43,7 +44,7 @@ const AdminSidebar = () => {
 
       <Nav className="flex-column px-2 py-3" as="nav">
         {menuItems.map((item) => (
-          <LinkContainer key={item.path} to={item.path}>
+          <LinkContainer key={item.path} to={item.path} onClick={onClose}>
             <Nav.Link 
               className={`sidebar-link d-flex align-items-center ${location.pathname === item.path ? 'active' : ''}`}
               aria-label={item.label}

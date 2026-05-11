@@ -65,9 +65,9 @@ const ContactListScreen = () => {
           <Table hover responsive className="mb-0 align-middle">
             <thead className="bg-light">
               <tr className="text-muted small text-uppercase fw-bold">
-                <th className="ps-4 py-3">Ngày gửi</th>
-                <th className="py-3">Họ tên</th>
-                <th className="py-3">Email</th>
+                <th className="ps-4 py-3 d-none d-md-table-cell">Ngày gửi</th>
+                <th className="py-3">Người gửi</th>
+                <th className="py-3 d-none d-lg-table-cell">Email</th>
                 <th className="py-3">Nội dung</th>
                 <th className="py-3 text-end pe-4">Hành động</th>
               </tr>
@@ -75,28 +75,32 @@ const ContactListScreen = () => {
             <tbody>
               {contacts.map((contact) => (
                 <tr key={contact._id}>
-                  <td className="ps-4 text-muted small">
+                  <td className="ps-4 text-muted small d-none d-md-table-cell">
                     {new Date(contact.createdAt).toLocaleDateString('vi-VN')}
                   </td>
                   <td>
-                    <span className="fw-bold text-dark">{contact.name}</span>
+                    <div className="fw-bold text-dark">{contact.name}</div>
+                    <div className="d-lg-none text-muted smaller" style={{ fontSize: '0.7rem' }}>{contact.email}</div>
+                    <div className="d-md-none text-muted smaller mt-1" style={{ fontSize: '0.65rem' }}>
+                      {new Date(contact.createdAt).toLocaleDateString('vi-VN')}
+                    </div>
+                  </td>
+                  <td className="d-none d-lg-table-cell">
+                    <a href={`mailto:${contact.email}`} className="text-decoration-none text-muted small">{contact.email}</a>
                   </td>
                   <td>
-                    <a href={`mailto:${contact.email}`} className="text-decoration-none text-muted">{contact.email}</a>
-                  </td>
-                  <td>
-                    <div className="text-dark bg-light p-3 rounded-3" style={{ minWidth: '300px', fontSize: '0.9rem' }}>
+                    <div className="text-dark bg-light p-2 p-md-3 rounded-3 message-text" style={{ minWidth: '150px', maxWidth: '400px', fontSize: '0.85rem' }}>
                       {contact.message}
                     </div>
                   </td>
                   <td className="text-end pe-4">
                     <Button 
                       variant="outline-danger" 
-                      className="btn-sm border-0 bg-light rounded-3" 
+                      className="btn-sm border-0 bg-light rounded-3 p-2" 
                       onClick={() => deleteHandler(contact._id)}
                       title="Xóa tin nhắn"
                     >
-                      <FaTrash />
+                      <FaTrash size={14} />
                     </Button>
                   </td>
                 </tr>

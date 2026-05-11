@@ -325,24 +325,68 @@ const CompareScreen = () => {
             transform: scale(1.05);
           }
           .table > :not(caption) > * > * {
-            padding: 1rem 0.5rem;
+            padding: 1.2rem 0.5rem;
           }
+          
+          /* Force columns to fit on mobile without scrolling */
           @media (max-width: 768px) {
+            .table-responsive {
+               overflow-x: hidden !important;
+               border-radius: 1rem;
+            }
+            .table {
+              table-layout: fixed;
+              width: 100% !important;
+            }
+            .table th:first-child, 
+            .table td:first-child {
+              width: 30% !important;
+              min-width: unset !important;
+              position: static !important;
+              box-shadow: none !important;
+              font-size: 0.75rem;
+              padding-left: 10px !important;
+            }
+            .table th:not(:first-child), 
+            .table td:not(:first-child) {
+              width: 35% !important;
+            }
             .table > :not(caption) > * > * {
-              padding: 0.5rem 0.2rem;
-              font-size: 0.85rem;
+              padding: 0.6rem 0.2rem;
+              font-size: 0.75rem;
             }
             .compare-img {
-              max-height: 100px !important;
-              width: 100% !important;
-              height: auto !important;
+              max-height: 60px !important;
+              width: auto !important;
+              height: 60px !important;
             }
             th h5 {
-              font-size: 1rem;
+              font-size: 0.8rem;
+              line-height: 1.2;
+              margin-bottom: 0;
             }
             .fs-5 {
-              font-size: 1rem !important;
+              font-size: 0.8rem !important;
             }
+            .badge {
+              font-size: 0.65rem !important;
+              padding: 0.3rem 0.5rem !important;
+            }
+            .btn-danger, .btn-primary {
+              font-size: 0.65rem;
+              padding: 0.4rem 0.6rem !important;
+              width: 100%;
+              white-space: nowrap;
+            }
+          }
+
+          /* Hide scrollbar but allow scrolling */
+          .table-responsive::-webkit-scrollbar {
+            height: 4px;
+          }
+          .table-responsive::-webkit-scrollbar-thumb {
+            background: #dee2e6;
+            border-radius: 10px;
           }
         `}
       </style>

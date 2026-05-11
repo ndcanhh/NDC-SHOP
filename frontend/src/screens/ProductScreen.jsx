@@ -253,23 +253,23 @@ const ProductScreen = () => {
                 </Row>
               </ListGroup.Item>
               
-              <ListGroup.Item className="p-4 pt-0 border-0">
+              <ListGroup.Item className="p-4 pt-3 border-0">
                 {displayStock === 0 ? (
                   <Button variant="secondary" className="w-100 py-3 fs-5 fw-bold rounded-pill shadow-sm" disabled>
                     Hết hàng
                   </Button>
                 ) : (
-                  <div className="d-flex flex-column gap-2">
+                  <div className="d-flex flex-column gap-3">
                     <Button 
                       variant="danger" 
-                      className="buy-btn w-100 m-0 py-3 rounded-pill fw-bold shadow-sm" 
+                      className="buy-btn w-100 m-0 py-3 rounded-pill fw-bold shadow-sm d-flex align-items-center justify-content-center" 
                       onClick={handleBuyNow} 
                     >
                       MUA NGAY
                     </Button>
                     <Button 
-                      variant="outline-danger" 
-                      className="w-100 m-0 py-2 rounded-pill fw-bold bg-white" 
+                      variant="light" 
+                      className="w-100 m-0 py-2 rounded-pill fw-bold btn-add-to-cart d-flex align-items-center justify-content-center" 
                       onClick={handleAddToCart} 
                       title="Thêm vào giỏ hàng"
                     >
